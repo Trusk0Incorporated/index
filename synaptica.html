@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RACK BRAIN — Full System Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;800&display=swap');
+
+:root {
+–bg: #0a0a0c;
+–panel: #111116;
+–border: #1e1e2a;
+–accent: #00ffc8;
+–accent2: #ff4d6d;
+–accent3: #a259ff;
+–accent4: #ffb830;
+–dim: #3a3a4a;
+–text: #c8c8d8;
+–textbright: #eeeef8;
+–mono: ‘Share Tech Mono’, monospace;
+–display: ‘Barlow Condensed’, sans-serif;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–mono);
+font-size: 12px;
+line-height: 1.6;
+overflow-x: hidden;
+}
+
+/* HEADER */
+header {
+background: linear-gradient(135deg, #0d0d14 0%, #141420 100%);
+border-bottom: 1px solid var(–accent);
+padding: 28px 40px 20px;
+position: sticky;
+top: 0;
+z-index: 100;
+display: flex;
+align-items: flex-end;
+gap: 40px;
+}
+
+header h1 {
+font-family: var(–display);
+font-weight: 800;
+font-size: 42px;
+letter-spacing: 6px;
+color: var(–accent);
+text-transform: uppercase;
+line-height: 1;
+}
+
+header p {
+font-family: var(–display);
+font-weight: 300;
+font-size: 14px;
+color: var(–dim);
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+
+.header-stats {
+margin-left: auto;
+display: flex;
+gap: 24px;
+align-items: flex-end;
+}
+
+.stat {
+text-align: center;
+}
+
+.stat-num {
+font-family: var(–display);
+font-size: 28px;
+font-weight: 800;
+color: var(–accent4);
+display: block;
+}
+
+.stat-label {
+font-size: 9px;
+color: var(–dim);
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+
+/* NAV */
+nav {
+background: var(–panel);
+border-bottom: 1px solid var(–border);
+padding: 0 40px;
+display: flex;
+gap: 0;
+overflow-x: auto;
+scrollbar-width: none;
+}
+
+nav::-webkit-scrollbar { display: none; }
+
+nav button {
+background: none;
+border: none;
+border-bottom: 2px solid transparent;
+color: var(–dim);
+font-family: var(–display);
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 14px 20px;
+cursor: pointer;
+transition: all 0.2s;
+white-space: nowrap;
+}
+
+nav button:hover { color: var(–textbright); }
+nav button.active {
+color: var(–accent);
+border-bottom-color: var(–accent);
+}
+
+/* MAIN */
+main {
+padding: 32px 40px;
+max-width: 1400px;
+margin: 0 auto;
+}
+
+.section { display: none; }
+.section.active { display: block; }
+
+/* CARDS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+
+.card {
+background: var(–panel);
+border: 1px solid var(–border);
+border-radius: 4px;
+padding: 18px;
+}
+
+.card-title {
+font-family: var(–display);
+font-weight: 600;
+font-size: 15px;
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-bottom: 14px;
+padding-bottom: 8px;
+border-bottom: 1px solid var(–border);
+}
+
+.card-title.green { color: var(–accent); border-color: var(–accent); }
+.card-title.red { color: var(–accent2); border-color: var(–accent2); }
+.card-title.purple { color: var(–accent3); border-color: var(–accent3); }
+.card-title.yellow { color: var(–accent4); border-color: var(–accent4); }
+
+/* MODULE CHIPS */
+.mod-chip {
+display: inline-block;
+background: #1a1a26;
+border: 1px solid var(–border);
+border-radius: 2px;
+padding: 2px 8px;
+font-size: 10px;
+margin: 2px;
+color: var(–text);
+}
+
+.mod-chip.clk { border-color: var(–accent4); color: var(–accent4); }
+.mod-chip.voice { border-color: var(–accent2); color: var(–accent2); }
+.mod-chip.mod { border-color: var(–accent3); color: var(–accent3); }
+.mod-chip.util { border-color: var(–accent); color: var(–accent); }
+.mod-chip.fx { border-color: #44aaff; color: #44aaff; }
+.mod-chip.midi { border-color: #ff88aa; color: #ff88aa; }
+.mod-chip.io { border-color: #aaffaa; color: #aaffaa; }
+
+/* PATCH LINES */
+.patch {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 6px 0;
+border-bottom: 1px solid #151520;
+flex-wrap: wrap;
+}
+
+.patch:last-child { border-bottom: none; }
+
+.patch-from {
+background: #1a1a26;
+border: 1px solid var(–accent4);
+color: var(–accent4);
+padding: 2px 10px;
+font-size: 11px;
+border-radius: 2px;
+min-width: 140px;
+}
+
+.patch-arrow {
+color: var(–dim);
+font-size: 14px;
+}
+
+.patch-to {
+background: #1a1a26;
+border: 1px solid var(–accent2);
+color: var(–accent2);
+padding: 2px 10px;
+font-size: 11px;
+border-radius: 2px;
+min-width: 140px;
+}
+
+.patch-note {
+font-size: 10px;
+color: var(–dim);
+font-style: italic;
+}
+
+/* MIDI TABLE */
+table {
+width: 100%;
+border-collapse: collapse;
+font-size: 11px;
+margin-bottom: 12px;
+}
+
+th {
+background: #151520;
+color: var(–accent);
+font-family: var(–display);
+font-weight: 600;
+letter-spacing: 2px;
+text-transform: uppercase;
+padding: 8px 12px;
+text-align: left;
+border: 1px solid var(–border);
+}
+
+td {
+padding: 7px 12px;
+border: 1px solid var(–border);
+color: var(–text);
+vertical-align: top;
+}
+
+tr:nth-child(even) td { background: #0d0d14; }
+tr:hover td { background: #151522; }
+
+/* RHYTHM PIPELINE */
+.pipeline {
+display: flex;
+align-items: stretch;
+gap: 0;
+overflow-x: auto;
+padding: 16px 0;
+scrollbar-width: thin;
+scrollbar-color: var(–accent) var(–border);
+}
+
+.pipe-stage {
+min-width: 160px;
+background: var(–panel);
+border: 1px solid var(–border);
+padding: 14px;
+position: relative;
+flex-shrink: 0;
+}
+
+.pipe-stage::after {
+content: ‘▶’;
+position: absolute;
+right: -16px;
+top: 50%;
+transform: translateY(-50%);
+color: var(–accent);
+font-size: 18px;
+z-index: 2;
+}
+
+.pipe-stage:last-child::after { display: none; }
+
+.pipe-arrow {
+width: 24px;
+background: none;
+flex-shrink: 0;
+}
+
+.stage-num {
+font-family: var(–display);
+font-size: 28px;
+font-weight: 800;
+color: var(–border);
+margin-bottom: 4px;
+}
+
+.stage-label {
+font-family: var(–display);
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 2px;
+color: var(–accent);
+text-transform: uppercase;
+margin-bottom: 8px;
+}
+
+.stage-module {
+font-size: 10px;
+color: var(–accent4);
+margin-bottom: 4px;
+}
+
+.stage-outputs li {
+font-size: 10px;
+color: var(–dim);
+list-style: none;
+padding-left: 10px;
+position: relative;
+}
+
+.stage-outputs li::before {
+content: ‘→’;
+position: absolute;
+left: 0;
+color: var(–accent3);
+}
+
+/* COMBOS */
+.combo {
+background: #0d0d14;
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent3);
+padding: 10px 14px;
+margin-bottom: 8px;
+border-radius: 0 2px 2px 0;
+}
+
+.combo-id {
+font-size: 9px;
+color: var(–accent3);
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-bottom: 4px;
+}
+
+.combo-title {
+font-family: var(–display);
+font-size: 14px;
+font-weight: 600;
+color: var(–textbright);
+margin-bottom: 6px;
+}
+
+.combo-chain {
+font-size: 10px;
+color: var(–accent);
+word-break: break-all;
+}
+
+.combo-desc {
+font-size: 10px;
+color: var(–dim);
+margin-top: 4px;
+}
+
+/* DISTING PROGRAMS */
+.program {
+background: #0d0d14;
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent2);
+padding: 10px 14px;
+margin-bottom: 6px;
+}
+
+.prog-id {
+font-size: 9px;
+color: var(–accent2);
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-bottom: 2px;
+}
+
+.prog-name {
+font-family: var(–display);
+font-size: 14px;
+font-weight: 600;
+color: var(–textbright);
+margin-bottom: 4px;
+}
+
+.prog-use {
+font-size: 10px;
+color: var(–dim);
+}
+
+/* TETRAPAD MODES */
+.tpad-mode {
+background: #0d0d14;
+border: 1px solid var(–border);
+border-left: 3px solid var(–accent4);
+padding: 10px 14px;
+margin-bottom: 6px;
+}
+
+.tpad-name {
+font-family: var(–display);
+font-size: 14px;
+font-weight: 600;
+color: var(–accent4);
+margin-bottom: 4px;
+}
+
+.tpad-desc {
+font-size: 10px;
+color: var(–dim);
+}
+
+/* LAYER COLORS */
+.layer { margin-bottom: 16px; }
+
+.layer-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 8px;
+}
+
+.layer-dot {
+width: 12px;
+height: 12px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+.layer-name {
+font-family: var(–display);
+font-size: 16px;
+font-weight: 600;
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+
+.layer-chain {
+font-size: 11px;
+color: var(–dim);
+margin-left: 24px;
+padding: 6px 12px;
+background: #0d0d14;
+border-radius: 2px;
+border: 1px solid var(–border);
+}
+
+/* COUNT BADGES */
+.count-badge {
+display: inline-block;
+background: var(–accent3);
+color: #0a0a0c;
+font-family: var(–display);
+font-weight: 800;
+font-size: 13px;
+padding: 2px 10px;
+border-radius: 2px;
+margin-right: 8px;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(–bg); }
+::-webkit-scrollbar-thumb { background: var(–dim); border-radius: 3px; }
+
+/* SECTION TITLE */
+.section-title {
+font-family: var(–display);
+font-size: 26px;
+font-weight: 800;
+letter-spacing: 4px;
+text-transform: uppercase;
+color: var(–textbright);
+margin-bottom: 24px;
+padding-bottom: 12px;
+border-bottom: 1px solid var(–border);
+}
+
+.section-title span {
+color: var(–accent);
+}
+
+.note {
+background: #0f0f1a;
+border: 1px solid #1e1e3a;
+border-left: 3px solid var(–accent3);
+padding: 10px 14px;
+margin-bottom: 16px;
+font-size: 11px;
+color: var(–text);
+line-height: 1.7;
+}
+
+.tag {
+display: inline-block;
+font-size: 9px;
+letter-spacing: 1px;
+text-transform: uppercase;
+padding: 1px 6px;
+border-radius: 1px;
+margin-right: 4px;
+font-family: var(–display);
+font-weight: 600;
+}
+
+.tag-clk { background: #2a1f00; color: var(–accent4); border: 1px solid var(–accent4); }
+.tag-cv { background: #1a002a; color: var(–accent3); border: 1px solid var(–accent3); }
+.tag-gate { background: #002a1a; color: var(–accent); border: 1px solid var(–accent); }
+.tag-audio { background: #2a0010; color: var(–accent2); border: 1px solid var(–accent2); }
+.tag-midi { background: #1a1a00; color: #ffdd44; border: 1px solid #ffdd44; }
+
+@media (max-width: 900px) {
+.grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+header { flex-wrap: wrap; }
+.header-stats { margin-left: 0; }
+main { padding: 16px 16px; }
+header { padding: 20px 16px; }
+nav { padding: 0 16px; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>RACK BRAIN</h1>
+    <p>Full System Reference — Signal Flow / Clocking / MIDI / Rhythm Ecosystem</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat"><span class="stat-num">42</span><span class="stat-label">Modules</span></div>
+    <div class="stat"><span class="stat-num">7</span><span class="stat-label">Rhythm Layers</span></div>
+    <div class="stat"><span class="stat-num">312+</span><span class="stat-label">Patch Combos</span></div>
+    <div class="stat"><span class="stat-num">14</span><span class="stat-label">MIDI Channels</span></div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="show('modules')">MODULE MAP</button>
+  <button onclick="show('clock')">CLOCKING</button>
+  <button onclick="show('midi')">MIDI / FH-2</button>
+  <button onclick="show('signalflow')">SIGNAL FLOW</button>
+  <button onclick="show('rhythm')">RHYTHM ENGINE</button>
+  <button onclick="show('combos')">COMBINATIONS</button>
+  <button onclick="show('disting')">DISTING MK3</button>
+  <button onclick="show('tetrapad')">TETRAPAD</button>
+  <button onclick="show('tascam')">TASCAM / OUTPUT</button>
+  <button onclick="show('patches')">PATCH SHEETS</button>
+</nav>
+
+<main>
+
+<!-- ═══════════════ MODULE MAP ═══════════════ -->
+
+<div id="modules" class="section active">
+  <div class="section-title">Module <span>MAP</span></div>
+
+  <div class="note">All modules categorized by function. Color coding used throughout the document. Every module in this system has at least one defined role in signal flow, clocking, MIDI, or rhythm.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title yellow">⏱ CLOCKING & SEQUENCING</div>
+      <span class="mod-chip clk">Tempi (Make Noise)</span>
+      <span class="mod-chip clk">Korg SQ-1</span>
+      <span class="mod-chip clk">FHX-8GT</span>
+      <span class="mod-chip clk">Doepfer Seq Switch V2</span>
+      <span class="mod-chip clk">Doepfer Dual Trig Delay</span>
+      <span class="mod-chip clk">Doepfer VC Switches</span>
+      <span class="mod-chip clk">Make Noise DXG (div/mux)</span>
+      <br><br>
+      <div style="font-size:10px;color:var(--dim)">
+        <b style="color:var(--accent4)">Tempi:</b> Master clock, 6 independent outputs (divisions, multiplications, swing).<br>
+        <b style="color:var(--accent4)">FHX-8GT:</b> Expander for FH-2, provides 8 gate outputs — use as probabilistic/Euclidean gate source.<br>
+        <b style="color:var(--accent4)">Seq Switch:</b> Routes clock/trigger to one of several destinations sequentially.<br>
+        <b style="color:var(--accent4)">DXG:</b> Logic/mux — AND/OR/XOR on clocks/gates.
+      </div>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title red">🔊 VOICES / OSCILLATORS</div>
+  <span class="mod-chip voice">Doepfer QZVCO</span>
+  <span class="mod-chip voice">ADDAC Acid Source</span>
+  <span class="mod-chip voice">Ensemble Oscillator (4ms)</span>
+  <span class="mod-chip voice">Intellijel Plonk</span>
+  <span class="mod-chip voice">Schlappi Interstellar Radio</span>
+  <span class="mod-chip voice">Bastl Pizza</span>
+  <br><br>
+  <div style="font-size:10px;color:var(--dim)">
+    <b style="color:var(--accent2)">QZVCO:</b> Quad VCO — 4 voices, FM index inputs, CV per voice.<br>
+    <b style="color:var(--accent2)">Acid Source:</b> 303-style bassline voice with accent, slide, gate, CV.<br>
+    <b style="color:var(--accent2)">Ensemble Osc:</b> 16-voice chord/drone oscillator, CV rootnote + spread + detune.<br>
+    <b style="color:var(--accent2)">Plonk:</b> Physical modelling percussion — exciter + resonator, fully CV-able.<br>
+    <b style="color:var(--accent2)">Interstellar Radio:</b> Feedback/noise/chaos oscillator — spectral modulation source.<br>
+    <b style="color:var(--accent2)">Pizza:</b> Multi-mode wavetable/FM hybrid synth voice.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title purple">〰 MODULATION</div>
+  <span class="mod-chip mod">Maths (Make Noise)</span>
+  <span class="mod-chip mod">Shakmat Triple Steeple</span>
+  <span class="mod-chip mod">ADDAC Light to CV</span>
+  <span class="mod-chip mod">Griffins Claws x2</span>
+  <span class="mod-chip mod">Doepfer A-117 DNG</span>
+  <span class="mod-chip mod">Intellijel Tetrapad</span>
+  <br><br>
+  <div style="font-size:10px;color:var(--dim)">
+    <b style="color:var(--accent3)">Maths:</b> Dual function generator — ADSR, slew, LFO, integrator, OR/AND logic out.<br>
+    <b style="color:var(--accent3)">Triple Steeple:</b> 3x bandpass filter as CV-able spectral resonator / envelope shaper.<br>
+    <b style="color:var(--accent3)">Light to CV:</b> 4 light sensors → 0–5V CV. Use as gestural or environmental modulation.<br>
+    <b style="color:var(--accent3)">Griffins Claws x2:</b> Dual chaos/random voltage generator — CV rate, smooth/stepped.<br>
+    <b style="color:var(--accent3)">A-117 DNG:</b> Digital noise gen — white/colored noise + sample clock → pitched noise.<br>
+    <b style="color:var(--accent3)">Tetrapad:</b> 4-pad performance controller — LFO, Notes, Voltages, Midiout modes.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title green">🔧 UTILITY / VCA / MIXING</div>
+  <span class="mod-chip util">Intellijel Amps x2</span>
+  <span class="mod-chip util">Intellijel Quad VCA</span>
+  <span class="mod-chip util">Tiptop MISO</span>
+  <span class="mod-chip util">Clank Toolbox</span>
+  <span class="mod-chip util">Doepfer Dual S&H</span>
+  <span class="mod-chip util">Precision Adder</span>
+  <span class="mod-chip util">T-Networks 103 + 104</span>
+  <span class="mod-chip util">Cosmotronic Messor</span>
+  <br><br>
+  <div style="font-size:10px;color:var(--dim)">
+    <b style="color:var(--accent)">Amps:</b> Dual VCA with exponential response — use for CV and audio. Each has gain CV.<br>
+    <b style="color:var(--accent)">Quad VCA:</b> 4 independent linear VCAs, mix output — ideal for 4-voice polyphonic gating.<br>
+    <b style="color:var(--accent)">MISO:</b> Mix/invert/scale/offset — attenuverter + summer. Use as CV processor.<br>
+    <b style="color:var(--accent)">Toolbox:</b> Logic gates (AND/OR/XOR/NOT) + flip-flops + comparator.<br>
+    <b style="color:var(--accent)">Dual S&H:</b> Sample & Hold x2 — gate-triggered random voltage source.<br>
+    <b style="color:var(--accent)">Precision Adder:</b> V/oct summing — transpose/detune without pitch drift.<br>
+    <b style="color:var(--accent)">T-103/104:</b> T-Networks passive mixer/attenuator utility — mixing, buffering.<br>
+    <b style="color:var(--accent)">Messor:</b> Compressor/limiter/sidechain — dynamics processing before Tascam.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title" style="color:#44aaff;border-color:#44aaff">🎛 FILTERS / FX</div>
+  <span class="mod-chip fx">ADDAC Dual Filter</span>
+  <span class="mod-chip fx">Bastl Pizza (filter mode)</span>
+  <span class="mod-chip fx">Expert Sleepers Disting MK3</span>
+  <span class="mod-chip fx">Tiptop MISO (processing)</span>
+  <span class="mod-chip fx">Strymon Magneto</span>
+  <span class="mod-chip fx">Pico DSP (Erica Synths)</span>
+  <br><br>
+  <div style="font-size:10px;color:var(--dim)">
+    <b style="color:#44aaff">Dual Filter:</b> 2x independent SVF — LP/HP/BP per channel, CV cutoff + resonance.<br>
+    <b style="color:#44aaff">Disting MK3:</b> 30+ algorithms — delay, pitch shift, reverb, VCO, S&H, quantizer, ES-1 encoder.<br>
+    <b style="color:#44aaff">Magneto:</b> 4-head tape delay — regen, wow/flutter, spread; send/return FX loop.<br>
+    <b style="color:#44aaff">Pico DSP:</b> 8 DSP modes — reverb, delay, flanger, chorus, pitchshift, filter.
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title midi">🎹 MIDI / I/O BRIDGE</div>
+  <span class="mod-chip midi">Expert Sleepers FH-2</span>
+  <span class="mod-chip midi">FHX-8GT (expander)</span>
+  <span class="mod-chip midi">FH-2 DIN Expansion</span>
+  <span class="mod-chip midi">Soundforce UDCO</span>
+  <span class="mod-chip io">Elektron Syntakt</span>
+  <span class="mod-chip io">Tascam Model 12</span>
+  <span class="mod-chip io">Korg SQ-1</span>
+  <br><br>
+  <div style="font-size:10px;color:var(--dim)">
+    <b style="color:#ff88aa">FH-2:</b> USB MIDI → 8 CV/gate outputs, highly configurable. Hub for all MIDI devices.<br>
+    <b style="color:#ff88aa">FHX-8GT:</b> Adds 8 more gate outputs to FH-2 — total 16 gates from MIDI.<br>
+    <b style="color:#ff88aa">DIN Expansion:</b> Adds physical DIN MIDI in/out/thru to FH-2.<br>
+    <b style="color:#ff88aa">UDCO:</b> USB-C MIDI control surface → CV/gate, designed to connect to DAW or FH-2.<br>
+    <b style="color:#aaffaa">Syntakt:</b> 12-track drum synth, MIDI out, analog out 4 individual + stereo mix.<br>
+    <b style="color:#aaffaa">Tascam 12:</b> 12-channel mixer, 10 mono + 1 stereo inputs, USB audio, MIDI I/O.
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══════════════ CLOCKING ═══════════════ -->
+
+<div id="clock" class="section">
+  <div class="section-title">Clock <span>ARCHITECTURE</span></div>
+
+  <div class="note">Single master clock — <b style="color:var(--accent4)">TEMPI</b> is the clock brain. Everything derives from it. The hierarchy ensures phase coherence while allowing polyrhythmic complexity. SQ-1 acts as a secondary melodic sequencer locked to Tempi clock.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title yellow">TEMPI — 6 CLOCK OUTPUTS</div>
+      <table>
+        <thead><tr><th>Output</th><th>Division/Mode</th><th>Patch To</th></tr></thead>
+        <tbody>
+          <tr><td>OUT 1</td><td>÷1 — Base pulse</td><td>Doepfer Dual Trig Delay, Clank Toolbox IN1</td></tr>
+          <tr><td>OUT 2</td><td>×2 — Double speed</td><td>FHX-8GT clock in, Plonk gate, Acid Source gate</td></tr>
+          <tr><td>OUT 3</td><td>÷3 — Triplet / swing</td><td>Seq Switch clock, Maths CH2 trigger</td></tr>
+          <tr><td>OUT 4</td><td>÷4 or ÷8 — Slow pulse</td><td>SQ-1 EXT CLK, Ensemble Osc FM rate, Magneto clock</td></tr>
+          <tr><td>OUT 5</td><td>Custom ratio — Polyrhythm</td><td>Triple Steeple trigger, DXG clock A</td></tr>
+          <tr><td>OUT 6</td><td>Reset / Sync pulse</td><td>Sequential Switch RESET, Tetrapad SYNC in</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:10px;color:var(--dim);margin-top:8px">⚠️ Tempi's <b>CLKMOD inputs</b> can receive CV to adjust rate live — patch Griffins Claws or Tetrapad LFO output here for clock drift/chaos effects.</div>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title yellow">CLOCK HIERARCHY DIAGRAM</div>
+  <div style="font-family:var(--mono);font-size:11px;line-height:2;color:var(--text)">
+```
+
+<pre style="color:var(--text);font-size:10px;line-height:1.8;">
+TEMPI ─┬─ OUT1 (÷1) ─── Trig Delay ─── Toolbox ─── Seq Switch
+       ├─ OUT2 (×2) ─── FHX-8GT ──────────────────────────────
+       ├─ OUT3 (÷3) ─── Maths CH2 ── Triple Steeple ──────────
+       ├─ OUT4 (÷4) ─── SQ-1 EXT CLK ─ Ensemble Osc ─────────
+       ├─ OUT5 (÷5) ─── DXG ─── Triple Steeple ───────────────
+       └─ OUT6 (RST) ── Seq Switch RST / Tetrapad SYNC
+
+SQ-1 (clocked by Tempi OUT4)
+  └─ CV A → QZVCO V/oct (voice 1 melody)
+  └─ CV B → Acid Source V/oct
+  └─ GATE → FH-2 Gate input (triggers MIDI)
+
+FHX-8GT (clocked by Tempi OUT2)
+  ├─ Gates 1–4: Euclidean / probabilistic patterns
+  └─ Gates 5–8: Random bursts → Toolbox logic inputs
+
+Tetrapad LFO (slow 0.01–0.1Hz square)
+  └─ → Tempi CLKMOD (macro reset)
+  └─ → Seq Switch RESET
+  └─ → Maths CYCLE trigger
+</pre>
+
+```
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title yellow">DOEPFER DUAL TRIG DELAY</div>
+      <div style="font-size:11px;color:var(--text)">Receives Tempi OUT1. Creates micro-offset copies:</div>
+      <br>
+      <div class="patch"><div class="patch-from">Tempi OUT1</div><div class="patch-arrow">→</div><div class="patch-to">Delay CH1 IN</div><div class="patch-note">Base pulse</div></div>
+      <div class="patch"><div class="patch-from">Delay CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Toolbox IN2</div><div class="patch-note">Offset copy (+5–20ms)</div></div>
+      <div class="patch"><div class="patch-from">Delay CH2 IN</div><div class="patch-arrow">→</div><div class="patch-to">Tempi OUT2</div><div class="patch-note">Double-time delayed</div></div>
+      <div class="patch"><div class="patch-from">Delay CH2 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Plonk Gate</div><div class="patch-note">Flammed percussion</div></div>
+      <br>
+      <div style="font-size:10px;color:var(--dim)">CV control delay time with Griffins Claws for humanized swing. Creates flams, drag, ghost notes.</div>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title yellow">KORG SQ-1 + TEMPI</div>
+  <div style="font-size:11px;color:var(--text)">SQ-1 locked to Tempi for melodic sequencing:</div>
+  <br>
+  <div class="patch"><div class="patch-from">Tempi OUT4</div><div class="patch-arrow">→</div><div class="patch-to">SQ-1 EXT CLK</div><div class="patch-note">Locks SQ-1 to grid</div></div>
+  <div class="patch"><div class="patch-from">SQ-1 CV A</div><div class="patch-arrow">→</div><div class="patch-to">QZVCO V/oct 1</div><div class="patch-note">Melody sequence</div></div>
+  <div class="patch"><div class="patch-from">SQ-1 CV B</div><div class="patch-arrow">→</div><div class="patch-to">Acid Source V/oct</div><div class="patch-note">Bass sequence</div></div>
+  <div class="patch"><div class="patch-from">SQ-1 GATE</div><div class="patch-arrow">→</div><div class="patch-to">FH-2 Gate 1</div><div class="patch-note">SQ-1 gates into MIDI</div></div>
+  <br>
+  <div style="font-size:10px;color:var(--dim)">SQ-1 can also run in MIDI mode — use USB to send MIDI notes directly to Syntakt channels.</div>
+</div>
+
+<div class="card">
+  <div class="card-title yellow">DOEPFER VC SWITCHES</div>
+  <div style="font-size:11px;color:var(--text)">Route clock signals to different destinations under CV control:</div>
+  <br>
+  <div class="patch"><div class="patch-from">Tempi OUT1/2/3</div><div class="patch-arrow">→</div><div class="patch-to">VC Switches INs</div><div class="patch-note">Multiple clocks in</div></div>
+  <div class="patch"><div class="patch-from">VC Switches OUT</div><div class="patch-arrow">→</div><div class="patch-to">QZVCO FM In</div><div class="patch-note">Rhythmic FM</div></div>
+  <div class="patch"><div class="patch-from">Griffins Claws CV</div><div class="patch-arrow">→</div><div class="patch-to">VC Switches CV</div><div class="patch-note">Chaotic switching</div></div>
+  <br>
+  <div style="font-size:10px;color:var(--dim)">Creates unpredictable rhythmic routings. The chaos of Griffins Claws determines which clock reaches which destination.</div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══════════════ MIDI / FH-2 ═══════════════ -->
+
+<div id="midi" class="section">
+  <div class="section-title">MIDI / <span>FH-2</span> Architecture</div>
+
+  <div class="note">The FH-2 is the MIDI brain. It connects USB MIDI devices (Syntakt, SQ-1, UDCO, DAW) and converts to CV/Gate for the rack. FHX-8GT adds 8 gate outputs. DIN expansion adds physical MIDI ports. Together: 8 CV outputs + 16 gate outputs from MIDI.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title midi">FH-2 OUTPUT MAP (8 CV/Gate pairs)</div>
+      <table>
+        <thead><tr><th>FH-2 Out</th><th>Type</th><th>Source</th><th>Destination</th></tr></thead>
+        <tbody>
+          <tr><td>OUT 1</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CH1 Note</td><td>QZVCO V/oct</td></tr>
+          <tr><td>OUT 2</td><td><span class="tag tag-gate">Gate</span></td><td>MIDI CH1 Gate</td><td>Quad VCA CH1</td></tr>
+          <tr><td>OUT 3</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CH2 Note</td><td>Acid Source V/oct</td></tr>
+          <tr><td>OUT 4</td><td><span class="tag tag-gate">Gate</span></td><td>MIDI CH2 Gate</td><td>Acid Source Gate</td></tr>
+          <tr><td>OUT 5</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CH3 Note</td><td>Ensemble Osc Root</td></tr>
+          <tr><td>OUT 6</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CH3 Velocity</td><td>Quad VCA CH3 CV</td></tr>
+          <tr><td>OUT 7</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CC#1 (Mod)</td><td>Dual Filter Cutoff A</td></tr>
+          <tr><td>OUT 8</td><td><span class="tag tag-cv">CV</span></td><td>MIDI CC#74 (Brightness)</td><td>Dual Filter Cutoff B</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title midi">FHX-8GT OUTPUT MAP (8 Gates)</div>
+  <table>
+    <thead><tr><th>Gate Out</th><th>Source</th><th>Destination</th></tr></thead>
+    <tbody>
+      <tr><td>GT 1</td><td>MIDI CH10 Note 36 (Kick)</td><td>Plonk Trigger / Maths Trigger</td></tr>
+      <tr><td>GT 2</td><td>MIDI CH10 Note 38 (Snare)</td><td>Triple Steeple Trigger CH1</td></tr>
+      <tr><td>GT 3</td><td>MIDI CH10 Note 42 (HH)</td><td>Trig Delay IN1</td></tr>
+      <tr><td>GT 4</td><td>MIDI CH10 Note 46 (OH)</td><td>Toolbox Logic IN1</td></tr>
+      <tr><td>GT 5</td><td>MIDI CH10 Note 49 (Crash)</td><td>Interstellar Radio Trig</td></tr>
+      <tr><td>GT 6</td><td>MIDI CH10 Note 51 (Ride)</td><td>Seq Switch clock in</td></tr>
+      <tr><td>GT 7</td><td>MIDI CH4 Gate</td><td>Plonk alt trigger / DXG</td></tr>
+      <tr><td>GT 8</td><td>MIDI Clock ÷4</td><td>Quad VCA rhythmic gate</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title midi">MIDI DEVICE CONNECTIONS</div>
+      <table>
+        <thead><tr><th>Device</th><th>Connection</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Elektron Syntakt</td><td>USB MIDI → FH-2 hub</td><td>Sends Note+Gate on CH1–4, Drum gates CH10</td></tr>
+          <tr><td>Korg SQ-1</td><td>USB MIDI → FH-2 hub</td><td>Sends CV sequence + gates on CH1</td></tr>
+          <tr><td>Soundforce UDCO</td><td>USB MIDI → FH-2 hub</td><td>CC controller → FH-2 CV outs (mod, filter, etc)</td></tr>
+          <tr><td>Tascam Model 12</td><td>DIN MIDI ↔ FH-2 DIN Exp</td><td>Transport sync, MIDI thru routing</td></tr>
+          <tr><td>Tempi</td><td>DIN MIDI out → FH-2 DIN in</td><td>Clock sync (MIDI clock at 24ppq)</td></tr>
+          <tr><td>DAW / Computer</td><td>USB → FH-2 (USB host)</td><td>DAW sequencing → modular voices</td></tr>
+          <tr><td>Intellijel Tetrapad</td><td>MIDI out mode → FH-2</td><td>Performance CC + notes into modular</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title midi">MIDI CHANNEL ASSIGNMENTS</div>
+  <table>
+    <thead><tr><th>CH</th><th>Source</th><th>Target Voice</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Syntakt T1 / SQ-1</td><td>QZVCO — Lead melody</td></tr>
+      <tr><td>2</td><td>Syntakt T2</td><td>Acid Source — Bass</td></tr>
+      <tr><td>3</td><td>Syntakt T3 / DAW</td><td>Ensemble Osc — Chords/drones</td></tr>
+      <tr><td>4</td><td>Syntakt T4</td><td>Plonk — Physical modeling perc</td></tr>
+      <tr><td>5</td><td>DAW / UDCO</td><td>Pizza — Wavetable/FM voice</td></tr>
+      <tr><td>6</td><td>Tetrapad MIDI mode</td><td>Interstellar Radio mod depth</td></tr>
+      <tr><td>7</td><td>UDCO CCs</td><td>Dual Filter CV / Pico DSP param</td></tr>
+      <tr><td>10</td><td>Syntakt Drum tracks</td><td>FHX-8GT gates 1–8</td></tr>
+      <tr><td>16</td><td>Sync/Clock</td><td>Tascam transport / Tempi reset</td></tr>
+    </tbody>
+  </table>
+</div>
+```
+
+  </div>
+
+  <div class="card">
+    <div class="card-title midi">FH-2 CONFIGURATION MODES TO PROGRAM</div>
+    <div class="grid-3" style="margin-top:8px">
+      <div>
+        <div style="color:var(--accent4);font-size:11px;font-weight:bold;margin-bottom:6px">CONFIG BLOCK 1: POLY VOICE</div>
+        <div style="font-size:10px;color:var(--dim)">
+          CH1–4 as 4-voice polyphony.<br>
+          • 4x CV (V/oct) → QZVCO voices<br>
+          • 4x Gate → Quad VCA CVs<br>
+          • Velocity → Amp CVs<br>
+          Use: chords + split key zones
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--accent4);font-size:11px;font-weight:bold;margin-bottom:6px">CONFIG BLOCK 2: DRUM GATES</div>
+        <div style="font-size:10px;color:var(--dim)">
+          CH10 → FHX-8GT gates 1–8.<br>
+          Map GM drum notes:<br>
+          36=kick, 38=snare, 42=hh cl<br>
+          46=hh op, 49=crash, 51=ride<br>
+          Use: Syntakt drums → modular triggers
+        </div>
+      </div>
+      <div>
+        <div style="color:var(--accent4);font-size:11px;font-weight:bold;margin-bottom:6px">CONFIG BLOCK 3: CC → CV</div>
+        <div style="font-size:10px;color:var(--dim)">
+          UDCO CCs → FH-2 CV outs 5–8.<br>
+          CC1 → Filter Cutoff A<br>
+          CC74 → Filter Cutoff B<br>
+          CC71 → Maths Time/Slew<br>
+          CC7 → Quad VCA master gain<br>
+          Use: live performance control
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SIGNAL FLOW ═══════════════ -->
+
+<div id="signalflow" class="section">
+  <div class="section-title">Audio <span>SIGNAL FLOW</span></div>
+
+  <div class="note">Six voice chains, each with its own filter, VCA, and FX path. All voices converge at Messor (compressor) before routing to Tascam Model 12. Syntakt provides its own 4 individual + stereo out directly to Tascam additional channels.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title red">VOICE 1 — MELODIC LEAD</div>
+      <div class="patch"><div class="patch-from">QZVCO OUT</div><div class="patch-arrow">→</div><div class="patch-to">Dual Filter CH1 IN</div><div class="patch-note">LP/BP selection</div></div>
+      <div class="patch"><div class="patch-from">Dual Filter CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Intellijel Amps 1A</div><div class="patch-note">VCA — gated by FH-2</div></div>
+      <div class="patch"><div class="patch-from">Amps 1A OUT</div><div class="patch-arrow">→</div><div class="patch-to">Pico DSP IN</div><div class="patch-note">Reverb/delay/chorus</div></div>
+      <div class="patch"><div class="patch-from">Pico DSP OUT</div><div class="patch-arrow">→</div><div class="patch-to">Messor IN1</div><div class="patch-note">Compression</div></div>
+      <div class="patch"><div class="patch-from">Messor OUT1</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH1</div><div class="patch-note">Final output</div></div>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title red">VOICE 2 — BASS / ACID</div>
+  <div class="patch"><div class="patch-from">Acid Source OUT</div><div class="patch-arrow">→</div><div class="patch-to">Dual Filter CH2 IN</div><div class="patch-note">HP filter for sub cut</div></div>
+  <div class="patch"><div class="patch-from">Dual Filter CH2 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Intellijel Amps 1B</div><div class="patch-note">VCA — accent gate</div></div>
+  <div class="patch"><div class="patch-from">Amps 1B OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH2</div><div class="patch-note">Direct — bass needs no extra FX</div></div>
+  <div style="font-size:10px;color:var(--dim);margin-top:8px">Acid Source accent input: patch Maths EOC to Acid Source Accent for envelope-controlled accent hits.</div>
+</div>
+
+<div class="card">
+  <div class="card-title red">VOICE 3 — ENSEMBLE / PADS</div>
+  <div class="patch"><div class="patch-from">Ensemble Osc OUT</div><div class="patch-arrow">→</div><div class="patch-to">Quad VCA CH3</div><div class="patch-note">Velocity-controlled level</div></div>
+  <div class="patch"><div class="patch-from">Quad VCA CH3 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Magneto IN L</div><div class="patch-note">Tape delay / spread</div></div>
+  <div class="patch"><div class="patch-from">Magneto OUT L+R</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH3+4</div><div class="patch-note">Stereo tape pad</div></div>
+</div>
+
+<div class="card">
+  <div class="card-title red">VOICE 4 — PERCUSSION (PLONK)</div>
+  <div class="patch"><div class="patch-from">Plonk OUT</div><div class="patch-arrow">→</div><div class="patch-to">Quad VCA CH4</div><div class="patch-note">Level from velocity</div></div>
+  <div class="patch"><div class="patch-from">Quad VCA CH4 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH5</div><div class="patch-note">Percussion direct</div></div>
+  <div style="font-size:10px;color:var(--dim);margin-top:8px">Plonk: FHX-8GT GT1 → Trig. FH-2 CH4 V/oct → Pitch. Maths envelope → Plonk Damping CV for velocity-sensitive decay.</div>
+</div>
+
+<div class="card">
+  <div class="card-title red">VOICE 5 — INTERSTELLAR RADIO / NOISE</div>
+  <div class="patch"><div class="patch-from">Interstellar Radio OUT</div><div class="patch-arrow">→</div><div class="patch-to">Triple Steeple IN</div><div class="patch-note">Bandpass spectral shaping</div></div>
+  <div class="patch"><div class="patch-from">Triple Steeple OUT</div><div class="patch-arrow">→</div><div class="patch-to">Quad VCA CH1</div><div class="patch-note">Rhythmic gating</div></div>
+  <div class="patch"><div class="patch-from">Quad VCA CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH6</div><div class="patch-note">Textural noise layer</div></div>
+</div>
+
+<div class="card">
+  <div class="card-title red">VOICE 6 — PIZZA / WAVETABLE</div>
+  <div class="patch"><div class="patch-from">Pizza AUDIO OUT</div><div class="patch-arrow">→</div><div class="patch-to">Disting MK3 IN A</div><div class="patch-note">Pitch shift / reverb algorithm</div></div>
+  <div class="patch"><div class="patch-from">Disting MK3 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Intellijel Amps 2A</div><div class="patch-note">VCA envelope</div></div>
+  <div class="patch"><div class="patch-from">Amps 2A OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH7</div><div class="patch-note"></div></div>
+</div>
+```
+
+  </div>
+
+  <div class="card">
+    <div class="card-title green">MODULATION ROUTING OVERVIEW</div>
+    <div class="grid-3" style="margin-top:8px">
+      <div>
+        <div style="color:var(--accent3);font-size:11px;font-weight:bold;margin-bottom:6px">MATHS → TARGETS</div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Maths CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">QZVCO FM Index</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Maths CH2 OUT</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Filter Cutoff A</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Maths SUM</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Magneto Regen</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Maths OR</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Toolbox OR in</div></div>
+      </div>
+      <div>
+        <div style="color:var(--accent3);font-size:11px;font-weight:bold;margin-bottom:6px">GRIFFINS CLAWS → TARGETS</div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Claws 1 CHAOS</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Trig Delay CV</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Claws 1 SMOOTH</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Ensemble Detune</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Claws 2 CHAOS</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">VC Switches CV</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">Claws 2 SMOOTH</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Pico DSP param</div></div>
+      </div>
+      <div>
+        <div style="color:var(--accent3);font-size:11px;font-weight:bold;margin-bottom:6px">DUAL S&H → TARGETS</div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">S&H 1 OUT</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Precision Adder A</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">S&H 2 OUT</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">QZVCO FM Index</div></div>
+        <div class="patch" style="margin:3px 0"><div class="patch-from" style="min-width:110px">A-117 noise → S&H IN</div><div class="patch-arrow">→</div><div class="patch-to" style="min-width:110px">Random pitch steps</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ RHYTHM ENGINE ═══════════════ -->
+
+<div id="rhythm" class="section">
+  <div class="section-title">Rhythm <span>ECOSYSTEM</span></div>
+
+  <div class="note">7 simultaneous rhythmic layers, each derived from Tempi's master clock through a mutation pipeline. Each layer feeds voices, VCAs, FM index, or filters. The system self-modulates: rhythmic outputs loop back to affect timing parameters.</div>
+
+  <!-- PIPELINE -->
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title yellow">RHYTHMIC MUTATION PIPELINE — 7 STAGES</div>
+    <div class="pipeline">
+      <div class="pipe-stage">
+        <div class="stage-num">01</div>
+        <div class="stage-label">Clock Gen</div>
+        <div class="stage-module">▶ TEMPI</div>
+        <ul class="stage-outputs">
+          <li>÷1 base pulse</li>
+          <li>×2 fast clock</li>
+          <li>÷3 triplet</li>
+          <li>÷4 slow</li>
+          <li>÷5 poly</li>
+          <li>RST reset</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">02</div>
+        <div class="stage-label">Time Mutate</div>
+        <div class="stage-module">▶ TRIG DELAY</div>
+        <ul class="stage-outputs">
+          <li>+5ms flam</li>
+          <li>+20ms sync</li>
+          <li>CV-delayed</li>
+          <li>Humanized</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">03</div>
+        <div class="stage-label">Probability</div>
+        <div class="stage-module">▶ FHX-8GT</div>
+        <ul class="stage-outputs">
+          <li>Euclidean</li>
+          <li>Random gates</li>
+          <li>Prob triggers</li>
+          <li>Clock bursts</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">04</div>
+        <div class="stage-label">Logic Mutate</div>
+        <div class="stage-module">▶ CLANK TOOLBOX</div>
+        <ul class="stage-outputs">
+          <li>AND rhythms</li>
+          <li>OR rhythms</li>
+          <li>XOR syncopate</li>
+          <li>NOT inverse</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">05</div>
+        <div class="stage-label">Route Mutate</div>
+        <div class="stage-module">▶ SEQ SWITCH</div>
+        <ul class="stage-outputs">
+          <li>Pattern cycle</li>
+          <li>Chaos clock</li>
+          <li>Shifting route</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">06</div>
+        <div class="stage-label">Env Mutate</div>
+        <div class="stage-module">▶ MATHS + STEEPLE</div>
+        <ul class="stage-outputs">
+          <li>Envelopes</li>
+          <li>Slewed shapes</li>
+          <li>Ratchets</li>
+          <li>Rhythmic LFOs</li>
+        </ul>
+      </div>
+      <div class="pipe-arrow"></div>
+      <div class="pipe-stage">
+        <div class="stage-num">07</div>
+        <div class="stage-label">VCA Gate</div>
+        <div class="stage-module">▶ QUAD VCA / AMPS</div>
+        <ul class="stage-outputs">
+          <li>FM modulation</li>
+          <li>Filter sweep</li>
+          <li>FX depth</li>
+          <li>Voice gating</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 LAYERS -->
+
+  <div class="card">
+    <div class="card-title yellow">7 RHYTHMIC LAYERS — CABLE-BY-CABLE</div>
+
+```
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#ffb830"></div>
+    <div class="layer-name" style="color:#ffb830">Layer 1 — Base Rhythm</div>
+  </div>
+  <div class="layer-chain">Tempi OUT1 → Plonk Trig | Acid Source Gate | Triple Steeple CH1 Trig<br>
+  <span style="color:var(--dim)">Raw ÷1 pulse — drives main percussion and bass gate</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#00ffc8"></div>
+    <div class="layer-name" style="color:#00ffc8">Layer 2 — Offset Rhythm</div>
+  </div>
+  <div class="layer-chain">Tempi OUT1 → Trig Delay CH1 IN → Trig Delay CH1 OUT → Maths CH1 Trig → Maths OUT → Quad VCA CH2 CV<br>
+  <span style="color:var(--dim)">Delayed copy of base pulse — creates flam / syncopation on VCA gating</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#a259ff"></div>
+    <div class="layer-name" style="color:#a259ff">Layer 3 — XOR Syncopation</div>
+  </div>
+  <div class="layer-chain">Tempi OUT1 → Toolbox IN1 | Tempi OUT3 → Toolbox IN2 → Toolbox XOR OUT → Seq Switch IN1 | Interstellar Radio Trig<br>
+  <span style="color:var(--dim)">XOR of base + triplet = pulses that fire when one OR the other is high, but NOT both = syncopation</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#ff4d6d"></div>
+    <div class="layer-name" style="color:#ff4d6d">Layer 4 — Pattern-Shifted Rhythm</div>
+  </div>
+  <div class="layer-chain">FHX-8GT GT1–4 → Seq Switch INs 1–4 → Seq Switch clocked by Griffins Claws → Seq Switch OUT → Triple Steeple CH2 Trig<br>
+  <span style="color:var(--dim)">Sequential switch selects between 4 different MIDI gate patterns chaotically — unpredictable hits on bandpass voice</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#44aaff"></div>
+    <div class="layer-name" style="color:#44aaff">Layer 5 — Envelope Rhythm</div>
+  </div>
+  <div class="layer-chain">Tempi OUT5 → Triple Steeple CH3 Trig → Triple Steeple CH3 OUT → MISO attenuate → QZVCO FM Index<br>
+  <span style="color:var(--dim)">Bandpass filter envelope shapes FM depth — rhythmic timbral change on lead voice</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#ff8844"></div>
+    <div class="layer-name" style="color:#ff8844">Layer 6 — Chaos Accents</div>
+  </div>
+  <div class="layer-chain">Griffins Claws 1 GATE OUT → Dual S&H 1 TRIG → S&H OUT → Precision Adder IN A | also → Toolbox AND IN2<br>
+  <span style="color:var(--dim)">Chaos triggers sample & hold — random pitch accent + AND-masked rhythmic accent hits</span></div>
+</div>
+
+<div class="layer">
+  <div class="layer-header">
+    <div class="layer-dot" style="background:#aaffaa"></div>
+    <div class="layer-name" style="color:#aaffaa">Layer 7 — Melodic Rhythm (SQ-1)</div>
+  </div>
+  <div class="layer-chain">SQ-1 (clocked Tempi OUT4) → SQ-1 GATE → FH-2 Gate In → FH-2 OUT2 → Quad VCA CH1 CV | SQ-1 CV A → QZVCO V/oct<br>
+  <span style="color:var(--dim)">Stepwise melodic gating on quantized grid — the human-feelable rhythmic-melodic layer</span></div>
+</div>
+```
+
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title red">SELF-MODULATION FEEDBACK LOOPS</div>
+    <div class="grid-2" style="margin-top:8px">
+      <div>
+        <div class="patch"><div class="patch-from">Toolbox XOR OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tempi CLKMOD</div><div class="patch-note">Rhythm modulates master tempo</div></div>
+        <div class="patch"><div class="patch-from">Maths EOC OUT</div><div class="patch-arrow">→</div><div class="patch-to">Trig Delay CV</div><div class="patch-note">Envelope end modulates delay time</div></div>
+        <div class="patch"><div class="patch-from">Griffins Claws OUT</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch CLK</div><div class="patch-note">Chaos controls switching speed</div></div>
+      </div>
+      <div>
+        <div class="patch"><div class="patch-from">Triple Steeple OUT</div><div class="patch-arrow">→</div><div class="patch-to">Maths Rise CV</div><div class="patch-note">Rhythmic envelope sculpts next env</div></div>
+        <div class="patch"><div class="patch-from">Seq Switch OUT</div><div class="patch-arrow">→</div><div class="patch-to">FHX-8GT PROB CV</div><div class="patch-note">Shifted rhythm changes gate probability</div></div>
+        <div class="patch"><div class="patch-from">Tetrapad LFO (slow)</div><div class="patch-arrow">→</div><div class="patch-to">Tempi RST + Seq Switch RST</div><div class="patch-note">Macro period reset — global re-sync</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ COMBINATIONS ═══════════════ -->
+
+<div id="combos" class="section">
+  <div class="section-title">Patch <span>COMBINATIONS</span></div>
+
+  <div class="note">
+    <b style="color:var(--accent)">How combinations are counted:</b><br>
+    Signal routing choices × modulation source choices × processing chain choices × destination choices.<br>
+    Conservative count: <b style="color:var(--accent4)">312+ distinct meaningful patch combinations</b> within scope of this system.<br>
+    Full permutation space (including parameter settings): <b style="color:var(--accent4)">3,000+</b>
+  </div>
+
+  <div class="grid-4">
+    <div class="card"><div class="card-title purple">CLOCK ROUTINGS</div><span class="count-badge">42</span><div style="font-size:10px;color:var(--dim)">6 Tempi outs × 7 possible destinations × combinations</div></div>
+    <div class="card"><div class="card-title purple">MOD → VOICE</div><span class="count-badge">56</span><div style="font-size:10px;color:var(--dim)">8 mod sources × 7 voice parameters</div></div>
+    <div class="card"><div class="card-title purple">MIDI → CV MAPS</div><span class="count-badge">48</span><div style="font-size:10px;color:var(--dim)">FH-2 16CH × 3 output types × configs</div></div>
+    <div class="card"><div class="card-title purple">AUDIO CHAINS</div><span class="count-badge">72</span><div style="font-size:10px;color:var(--dim)">6 voices × filter × VCA × FX permutations</div></div>
+    <div class="card"><div class="card-title purple">RHYTHM LAYERS</div><span class="count-badge">35</span><div style="font-size:10px;color:var(--dim)">7 layers × 5 possible destinations each</div></div>
+    <div class="card"><div class="card-title purple">LOGIC COMBOS</div><span class="count-badge">24</span><div style="font-size:10px;color:var(--dim)">Toolbox AND/OR/XOR/NOT × 6 input pairs</div></div>
+    <div class="card"><div class="card-title purple">FEEDBACK LOOPS</div><span class="count-badge">18</span><div style="font-size:10px;color:var(--dim)">6 feedback sources × 3 self-mod targets</div></div>
+    <div class="card"><div class="card-title purple">DISTING ALGOS</div><span class="count-badge">30+</span><div style="font-size:10px;color:var(--dim)">30 algorithms × 2 input routings</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title purple">NAMED COMBINATION PRESETS</div>
+
+```
+  <div class="combo">
+    <div class="combo-id">COMBO-01</div>
+    <div class="combo-title">ACID MACHINE</div>
+    <div class="combo-chain">SQ-1 (clk Tempi ÷4) → Acid Source V/oct + Gate → Dual Filter CH2 (LP resonant) → Amps → Messor → Tascam CH2 | Maths env → Filter Cutoff | Trig Delay → flam gate</div>
+    <div class="combo-desc">Classic 303 acid sequence with envelope-swept filter cutoff and delayed accent gates.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-02</div>
+    <div class="combo-title">SELF-MODULATING DRONE</div>
+    <div class="combo-chain">Ensemble Osc (root: FH-2 CH3) → Magneto (regen 70%+) → Maths feedback → Magneto Flutter CV | Interstellar Radio → Triple Steeple → Ensemble FM In</div>
+    <div class="combo-desc">Drone that evolves through tape feedback and spectral modulation of Ensemble Osc FM input.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-03</div>
+    <div class="combo-title">PROBABILISTIC PERCUSSION</div>
+    <div class="combo-chain">FHX-8GT GT1–8 (Syntakt CH10) → Plonk, Interstellar Radio, Trig Delay, Toolbox | Maths env → Plonk Damping | Griffins Claws → Trig Delay CV (humanize)</div>
+    <div class="combo-desc">8 MIDI drum triggers → modular percussion layer with probability, chaos humanization.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-04</div>
+    <div class="combo-title">POLYRHYTHMIC CLOCK MESH</div>
+    <div class="combo-chain">Tempi ÷1+÷3+÷5 → Toolbox (XOR of ÷3 and ÷5) → Seq Switch (clk Griffins Claws) → Triple Steeple Trigs | Tetrapad LFO slow RST → all module resets</div>
+    <div class="combo-desc">Three-way polyrhythm logic-combined and sequentially distributed, reset every ~16 bars.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-05</div>
+    <div class="combo-title">CHAOS MELODY GENERATOR</div>
+    <div class="combo-chain">A-117 DNG → Dual S&H IN (clk Tempi OUT2) → S&H OUT → Precision Adder + QZVCO base → QZVCO V/oct | Griffins Claws → S&H rate CV | FH-2 gate → Quad VCA</div>
+    <div class="combo-desc">Sampled noise gives random pitches; Griffins Claws changes sample rate for pitch density control.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-06</div>
+    <div class="combo-title">FM RHYTHM BOMB</div>
+    <div class="combo-chain">Tempi OUT5 → Triple Steeple Trig → Steeple OUT → Quad VCA CH2 CV | Quad VCA CH2 IN = QZVCO FM Index signal | Quad VCA CH2 OUT → QZVCO FM In</div>
+    <div class="combo-desc">Bandpass-shaped envelopes gate FM index depth — rhythmic timbral modulation on QZVCO.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-07</div>
+    <div class="combo-title">LIGHT-CONTROLLED FILTER</div>
+    <div class="combo-chain">ADDAC Light to CV OUT1–4 → MISO (mix/attenuate) → MISO OUT → Dual Filter Cutoff A+B | Light to CV OUT2 → Magneto Wow/Flutter CV</div>
+    <div class="combo-desc">Room light / hand gestures over sensors control filter sweep and tape modulation in realtime.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-08</div>
+    <div class="combo-title">TURING-STYLE GATE MACHINE</div>
+    <div class="combo-chain">FHX-8GT (all 8 gates, probability mode) → Toolbox AND/XOR pairs → Seq Switch → Maths trig → Envelopes → Quad VCA | Tempi RST → FHX-8GT RST (periodic)</div>
+    <div class="combo-desc">8 probabilistic gates logically combined, switched, and enveloped — never repeats, never stops.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title purple">MORE COMBINATIONS</div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-09</div>
+    <div class="combo-title">MAGNETO FEEDBACK LOOP</div>
+    <div class="combo-chain">Quad VCA OUT → Magneto IN → Magneto OUT → Triple Steeple IN → Steeple OUT → Magneto Speed CV | Maths ENV → Magneto Regen CV</div>
+    <div class="combo-desc">Tape delay fed back through bandpass filter, with regen controlled by decaying envelope — generates infinite texture crescendos.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-10</div>
+    <div class="combo-title">PITCH DAISY-CHAIN</div>
+    <div class="combo-chain">FH-2 V/oct → Precision Adder IN A | S&H OUT → Precision Adder IN B | Griffins Claws → Precision Adder IN C → Adder OUT → QZVCO V/oct</div>
+    <div class="combo-desc">MIDI note + random offset + chaos = harmonically rich but unpredictable melodic movement.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-11</div>
+    <div class="combo-title">RHYTHMIC FILTER SWEEP</div>
+    <div class="combo-chain">Tempi OUT3 (÷3) → Maths CH1 Trig → Maths CH1 ENV OUT → MISO (invert) → MISO OUT → Dual Filter Cutoff A | Tempi OUT1 → Maths CH2 → Filter B</div>
+    <div class="combo-desc">Two different envelope speeds sweep two filter channels in opposite phase — creates filter breathing effect.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-12</div>
+    <div class="combo-title">SYNTAKT → MODULAR SYNC</div>
+    <div class="combo-chain">Syntakt MIDI out → FH-2 USB → FHX-8GT gates → Plonk + Interstellar trig | Syntakt CV/Gate out → directly to Quad VCA CV + QZVCO FM</div>
+    <div class="combo-desc">Syntakt drives percussion voices in modular while its analog outs control VCA and FM directly.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-13</div>
+    <div class="combo-title">MACRO RESET CYCLE</div>
+    <div class="combo-chain">Tetrapad LFO (0.05Hz square) → Tempi RST + Seq Switch RST + Maths CYCLE RST + Triple Steeple RST + FHX-8GT RST</div>
+    <div class="combo-desc">Every ~20 seconds, all rhythmic modules simultaneously reset to beat 1 — creates macro structure in live performance.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-14</div>
+    <div class="combo-title">VC SWITCH TIMBRE SCAN</div>
+    <div class="combo-chain">QZVCO OUT × 4 → VC Switches INs (A+B) → VC Switches OUT → Dual Filter IN | Griffins Claws → VC Switches CV | Tempi OUT2 → sampling rate</div>
+    <div class="combo-desc">VC Switches scan through QZVCO voices under chaos CV — filter receives a different oscillator at each switch point.</div>
+  </div>
+
+  <div class="combo">
+    <div class="combo-id">COMBO-15</div>
+    <div class="combo-title">ENVIRONMENTAL SEQUENCER</div>
+    <div class="combo-chain">Light to CV OUT1–4 (4 sensors) → FH-2 analog inputs (CV mapping) → FH-2 remap to MIDI CC → Syntakt parameter locks | simultaneously → Dual Filter + Pico DSP</div>
+    <div class="combo-desc">Physical environment (light, shadow, movement) controls both modular parameters and Syntakt CCs.</div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══════════════ DISTING MK3 ═══════════════ -->
+
+<div id="disting" class="section">
+  <div class="section-title">Expert Sleepers <span>DISTING MK3</span></div>
+
+  <div class="note">Disting MK3 has 30+ algorithms selectable via the encoder. Use it as an in-patch effects unit, VCO, quantizer, or encoder. Listed here are the algorithms most useful in this specific system context.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title red">PRIORITY ALGORITHMS FOR THIS SYSTEM</div>
+
+```
+  <div class="program">
+    <div class="prog-id">ALG B1</div>
+    <div class="prog-name">Dual Quantizer</div>
+    <div class="prog-use">Use: Griffins Claws OUT → Disting Z IN → quantized pitch → QZVCO V/oct. Turns chaos CV into in-scale notes.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG B3</div>
+    <div class="prog-name">Dual S&H / Dual T&H</div>
+    <div class="prog-use">Use: Supplement Doepfer Dual S&H — add two more sample & hold channels for extra random voltage sources.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG D2</div>
+    <div class="prog-name">Clockable Delay (Audio)</div>
+    <div class="prog-use">Use: Pizza audio → Disting IN. Tempi clock → Z IN (delay sync). Output → Tascam CH7. Tempo-locked delay on wavetable voice.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG D5</div>
+    <div class="prog-name">Stereo Reverb</div>
+    <div class="prog-use">Use: Interstellar Radio OUT → Disting IN A. Reverb L+R → Tascam CH8+9. Adds space to noise/chaos voice.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG E1</div>
+    <div class="prog-name">Pitch Shifter</div>
+    <div class="prog-use">Use: Ensemble Osc OUT → Disting. Maths ENV → Disting Z (pitch shift amount). Dynamic harmonic transposition on chord voice.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG F1</div>
+    <div class="prog-name">Bit Crusher</div>
+    <div class="prog-use">Use: Drum mix bus → Disting. FHX-8GT gate → Z (bypass). Triggered lo-fi degradation on percussion layer.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG G2</div>
+    <div class="prog-name">VCO with FM</div>
+    <div class="prog-use">Use as 5th oscillator when Plonk is used in resonator mode. FH-2 V/oct → Disting X. Tempi clock → Y (hard sync).</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG H2</div>
+    <div class="prog-name">ES-1 Encoder</div>
+    <div class="prog-use">Advanced: encode CV streams into audio for recording into Tascam, then decode later. Useful for CV sequence archiving.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG J2</div>
+    <div class="prog-name">MIDI to CV</div>
+    <div class="prog-use">Use as secondary MIDI-CV converter when FH-2 outputs are all occupied. Feed from FH-2 MIDI thru → Disting MIDI in → additional V/oct + gate.</div>
+  </div>
+
+  <div class="program">
+    <div class="prog-id">ALG L1</div>
+    <div class="prog-name">Clockable LFO</div>
+    <div class="prog-use">Tempi OUT4 → Disting Z (clock). Disting X OUT = LFO synced to tempo. Route to Magneto Wow or Filter resonance for rhythmic modulation.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title red">DISTING PATCHING GUIDE</div>
+  <div style="font-size:11px;margin-bottom:12px;color:var(--dim)">Disting MK3 has 3 inputs: X, Y, Z — and 2 outputs. Algorithm determines which input does what.</div>
+
+  <table>
+    <thead><tr><th>Scenario</th><th>X Input</th><th>Y Input</th><th>Z Input</th><th>Outputs</th></tr></thead>
+    <tbody>
+      <tr><td>Quantizer</td><td>CV from chaos</td><td>Scale select CV</td><td>Gate trigger</td><td>OUT1: V/oct</td></tr>
+      <tr><td>Audio Delay</td><td>Audio in</td><td>Feedback CV</td><td>Clock (Tempi)</td><td>OUT1: wet</td></tr>
+      <tr><td>Reverb</td><td>Audio in L</td><td>Audio in R</td><td>Decay CV</td><td>OUT1+2: L/R</td></tr>
+      <tr><td>Pitch Shift</td><td>Audio in</td><td>Shift amount</td><td>Blend CV</td><td>OUT1: shifted</td></tr>
+      <tr><td>VCO</td><td>V/oct</td><td>PWM CV</td><td>Sync gate</td><td>OUT1: wave</td></tr>
+      <tr><td>Clockable LFO</td><td>Phase CV</td><td>Shape CV</td><td>Clock in</td><td>OUT1: LFO</td></tr>
+      <tr><td>Bit Crush</td><td>Audio in</td><td>Sample rate CV</td><td>Bit depth CV</td><td>OUT1: crushed</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="margin-top:12px">
+    <b style="color:var(--accent2)">IMPORTANT:</b> Disting MK3 remembers last algorithm on power cycle. Use a small strip of gaffer tape or label on the front panel to mark the current algorithm setting for live performance reliability.
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══════════════ TETRAPAD ═══════════════ -->
+
+<div id="tetrapad" class="section">
+  <div class="section-title">Intellijel <span>TETRAPAD</span> Modes</div>
+
+  <div class="note">Tetrapad has 4 major modes: Notes, LFO, Voltages, MIDI. Each pad can be assigned independently. In this system, use different presets for different performance roles. The global reset function is critical to the rhythm ecosystem.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title yellow">RECOMMENDED TETRAPAD PRESETS</div>
+
+```
+  <div class="tpad-mode">
+    <div class="tpad-name">PRESET 1 — GLOBAL RESET / LFO</div>
+    <div class="tpad-desc">
+      <b>PAD 1:</b> LFO mode, square wave, rate 0.05Hz → OUT1 → Tempi RST + Seq Switch RST (macro reset)<br>
+      <b>PAD 2:</b> LFO mode, sine, rate 0.2Hz → OUT2 → Magneto Flutter CV<br>
+      <b>PAD 3:</b> LFO mode, triangle, rate 0.5Hz → OUT3 → Dual Filter Cutoff A<br>
+      <b>PAD 4:</b> LFO mode, random, rate 0.3Hz → OUT4 → Ensemble Osc Spread<br>
+      <span style="color:var(--accent4)">USE CASE: Background modulation preset. Leave running, patch outputs to static destinations.</span>
+    </div>
+  </div>
+
+  <div class="tpad-mode">
+    <div class="tpad-name">PRESET 2 — PERFORMANCE VOLTAGES</div>
+    <div class="tpad-desc">
+      <b>PAD 1:</b> Voltages mode, 4 steps 0–5V → OUT1 → Dual Filter Cutoff (manual sweep)<br>
+      <b>PAD 2:</b> Voltages mode, 4 steps → OUT2 → QZVCO FM Index (timbre control)<br>
+      <b>PAD 3:</b> Voltages mode, 4 steps → OUT3 → Magneto Regen (feedback drama)<br>
+      <b>PAD 4:</b> Voltages mode, latching gate → OUT4 → Quad VCA master CV (mute/unmute)<br>
+      <span style="color:var(--accent4)">USE CASE: Manual performance control. Touch pads to sweep parameters live.</span>
+    </div>
+  </div>
+
+  <div class="tpad-mode">
+    <div class="tpad-name">PRESET 3 — MIDI PERFORMANCE</div>
+    <div class="tpad-desc">
+      <b>PAD 1–4:</b> MIDI Note mode → sends MIDI notes CH6 → FH-2 DIN → Syntakt MIDI in (play Syntakt synth tracks live)<br>
+      <b>OR:</b> MIDI CC mode → CCs 1,74,71,7 → FH-2 → CV outs → Filter/FM/Slew/VCA control<br>
+      <span style="color:var(--accent4)">USE CASE: Play Syntakt from modular performance pads, or live CC control of FH-2 CV destinations.</span>
+    </div>
+  </div>
+
+  <div class="tpad-mode">
+    <div class="tpad-name">PRESET 4 — CLOCK MODULATION</div>
+    <div class="tpad-desc">
+      <b>PAD 1:</b> Voltage mode → OUT1 → Tempi CLKMOD (manually speed up/slow down master clock)<br>
+      <b>PAD 2:</b> Voltage mode → OUT2 → Trig Delay TIME CV (control flam intensity)<br>
+      <b>PAD 3:</b> Gate mode → OUT3 → FHX-8GT PROB CV (touch to increase gate probability)<br>
+      <b>PAD 4:</b> Gate hold → OUT4 → Maths CYCLE (hold to sustain repeating envelope burst)<br>
+      <span style="color:var(--accent4)">USE CASE: Live clock and rhythm manipulation. Most expressive performance preset.</span>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title yellow">TETRAPAD EXPANSION + SYNC</div>
+  <div style="font-size:11px;color:var(--text);margin-bottom:12px">The Tetrapad SYNC input accepts clock to phase-lock LFOs. The SYNC output can send clock to other modules.</div>
+
+  <div class="patch"><div class="patch-from">Tempi OUT6 (RST)</div><div class="patch-arrow">→</div><div class="patch-to">Tetrapad SYNC IN</div><div class="patch-note">Phase-locks all Tetrapad LFOs to Tempi</div></div>
+  <div class="patch"><div class="patch-from">Tetrapad OUT1 (LFO sq)</div><div class="patch-arrow">→</div><div class="patch-to">Tempi RST</div><div class="patch-note">Slow LFO resets master clock</div></div>
+  <div class="patch"><div class="patch-from">Tetrapad OUT2</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch RST</div><div class="patch-note">Reset sequential switch pattern</div></div>
+  <div class="patch"><div class="patch-from">Tetrapad OUT3</div><div class="patch-arrow">→</div><div class="patch-to">Maths CYCLE trig</div><div class="patch-note">Trigger repeating envelope cycle</div></div>
+  <div class="patch"><div class="patch-from">Tetrapad MIDI OUT</div><div class="patch-arrow">→</div><div class="patch-to">FH-2 DIN IN</div><div class="patch-note">Performance notes/CCs into MIDI hub</div></div>
+
+  <br>
+  <div class="card-title yellow" style="margin-top:8px">TETRAPAD + TETE EXPANDER NOTE</div>
+  <div style="font-size:10px;color:var(--dim)">If you have the Tete expander, you can store 64 presets and sequence through them via clock — this transforms Tetrapad into a macro-modulation sequencer. Clock Tete ADVANCE from Tempi OUT4 to step through preset sequences during a performance.</div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ═══════════════ TASCAM / OUTPUT ═══════════════ -->
+
+<div id="tascam" class="section">
+  <div class="section-title">Tascam Model 12 / <span>OUTPUT</span> Routing</div>
+
+  <div class="note">Tascam Model 12 has 10 mono XLR/TRS inputs + 1 stereo input + USB audio. Syntakt provides 4 individual outputs + stereo mix. Modular voices go through Messor compressor before Tascam. Total output capacity: 12 channels simultaneously.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title green">TASCAM CHANNEL MAP</div>
+      <table>
+        <thead><tr><th>CH</th><th>Source</th><th>Signal</th><th>EQ/FX Suggestion</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Messor OUT1</td><td>QZVCO Lead (filtered)</td><td>Hi-pass @ 80Hz, subtle compression</td></tr>
+          <tr><td>2</td><td>Messor OUT2</td><td>Acid Source Bass</td><td>LP @ 400Hz + boost 100Hz</td></tr>
+          <tr><td>3</td><td>Magneto OUT L</td><td>Ensemble Osc L (tape)</td><td>Stereo width on 3+4, gentle reverb</td></tr>
+          <tr><td>4</td><td>Magneto OUT R</td><td>Ensemble Osc R (tape)</td><td>Paired with CH3</td></tr>
+          <tr><td>5</td><td>Quad VCA CH4 OUT</td><td>Plonk Percussion</td><td>Transient boost, tight gate</td></tr>
+          <tr><td>6</td><td>Pico DSP OUT / Triple Steeple</td><td>Interstellar Radio (processed)</td><td>Band-limit 200Hz–8kHz</td></tr>
+          <tr><td>7</td><td>Amps 2A OUT</td><td>Pizza / Wavetable</td><td>Notch 2kHz if harsh, air at 10kHz</td></tr>
+          <tr><td>8</td><td>Syntakt OUT1</td><td>Syntakt Drum 1 (individual)</td><td>Drum EQ, sidechain trigger</td></tr>
+          <tr><td>9</td><td>Syntakt OUT2</td><td>Syntakt Drum 2 (individual)</td><td></td></tr>
+          <tr><td>10</td><td>Syntakt OUT3+4 (stereo)</td><td>Syntakt Mix</td><td>Gentle glue compression</td></tr>
+          <tr><td>11+12</td><td>Syntakt Master OUT L+R</td><td>Syntakt full stereo</td><td>Reference level, no processing</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+```
+<div class="card">
+  <div class="card-title green">MESSOR — DYNAMICS BEFORE TASCAM</div>
+  <div style="font-size:11px;color:var(--text);margin-bottom:12px">Cosmotronic Messor is a stereo compressor/limiter. Route all modular audio through it before Tascam for cohesive mix dynamics.</div>
+
+  <div class="patch"><div class="patch-from">QZVCO filtered</div><div class="patch-arrow">→</div><div class="patch-to">Messor IN L</div><div class="patch-note">Lead voice</div></div>
+  <div class="patch"><div class="patch-from">Acid Source filtered</div><div class="patch-arrow">→</div><div class="patch-to">Messor IN R</div><div class="patch-note">Bass voice</div></div>
+  <div class="patch"><div class="patch-from">Plonk OUT</div><div class="patch-arrow">→</div><div class="patch-to">Messor Sidechain</div><div class="patch-note">Kick-triggered ducking</div></div>
+  <div class="patch"><div class="patch-from">Messor OUT L</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH1</div></div>
+  <div class="patch"><div class="patch-from">Messor OUT R</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH2</div></div>
+
+  <br>
+  <div class="card-title green" style="margin-top:8px">SYNTAKT → TASCAM DIRECT</div>
+  <div style="font-size:10px;color:var(--dim);margin-bottom:8px">Syntakt has 4 assignable individual audio outputs + stereo mix output. Use for parallel processing:</div>
+  <div class="patch"><div class="patch-from">Syntakt OUT A</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH8</div><div class="patch-note">Kick/bass drum</div></div>
+  <div class="patch"><div class="patch-from">Syntakt OUT B</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH9</div><div class="patch-note">Snare/clap</div></div>
+  <div class="patch"><div class="patch-from">Syntakt STEREO OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH10 (stereo)</div><div class="patch-note">Full Syntakt mix</div></div>
+
+  <br>
+  <div class="card-title green" style="margin-top:8px">MIDI / SYNC TO TASCAM</div>
+  <div class="patch"><div class="patch-from">Tascam MIDI OUT</div><div class="patch-arrow">→</div><div class="patch-to">FH-2 DIN IN</div><div class="patch-note">DAW transport → modular sync</div></div>
+  <div class="patch"><div class="patch-from">FH-2 DIN OUT</div><div class="patch-arrow">→</div><div class="patch-to">Tascam MIDI IN</div><div class="patch-note">Modular MIDI → Tascam tracks</div></div>
+  <div class="patch"><div class="patch-from">Tascam USB</div><div class="patch-arrow">→</div><div class="patch-to">Computer DAW</div><div class="patch-note">12-channel USB audio interface</div></div>
+</div>
+```
+
+  </div>
+
+  <div class="card">
+    <div class="card-title green">TASCAM MODEL 12 — MIDI CONTROL SURFACE MODE</div>
+    <div style="font-size:11px;color:var(--text);margin-bottom:8px">The Tascam Model 12 can act as a MIDI control surface via USB. Use faders to control Syntakt mixer or DAW mixer. Also: set Tascam as MIDI clock slave to keep recording in sync with modular:</div>
+    <div class="grid-3">
+      <div>
+        <div style="font-size:10px;color:var(--accent4);margin-bottom:4px">SYNC SETUP</div>
+        <div style="font-size:10px;color:var(--dim)">• Tempi sends MIDI clock (DIN)<br>• DIN → FH-2 DIN → FH-2 MIDI thru → Tascam MIDI IN<br>• Tascam set to external sync<br>• Recording stays locked to modular tempo</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--accent4);margin-bottom:4px">FADER CONTROL</div>
+        <div style="font-size:10px;color:var(--dim)">• Tascam USB MIDI → computer DAW<br>• Map Tascam faders to DAW mixer<br>• Use EQ controls to automate plugin params<br>• Tactile mixing of all 12 modular channels</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--accent4);margin-bottom:4px">USB AUDIO</div>
+        <div style="font-size:10px;color:var(--dim)">• Tascam appears as 12-in/2-out USB audio<br>• Record all modular channels simultaneously<br>• Return tracks from DAW for processing<br>• Bounce to SD card independently</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PATCH SHEETS ═══════════════ -->
+
+<div id="patches" class="section">
+  <div class="section-title">Startup <span>PATCH SHEETS</span></div>
+
+  <div class="note">These are ready-to-patch starting configurations. Each one uses the full system and covers a different musical context. Patch these cable by cable in listed order.</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent);border-color:var(--accent)">PATCH A — FULL RHYTHM ECOSYSTEM (INIT)</div>
+      <div style="font-size:10px;color:var(--dim);margin-bottom:10px">The complete rhythmic self-modulating system. Start here.</div>
+
+```
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;font-weight:bold">① CLOCK SPINE</div>
+  <div class="patch"><div class="patch-from">Tempi OUT1</div><div class="patch-arrow">→</div><div class="patch-to">Trig Delay CH1 IN</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT2</div><div class="patch-arrow">→</div><div class="patch-to">FHX-8GT CLK IN</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT3</div><div class="patch-arrow">→</div><div class="patch-to">Toolbox IN2 (÷3)</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT4</div><div class="patch-arrow">→</div><div class="patch-to">SQ-1 EXT CLK</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT5</div><div class="patch-arrow">→</div><div class="patch-to">Triple Steeple CH3 Trig</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT6</div><div class="patch-arrow">→</div><div class="patch-to">Tetrapad SYNC IN</div></div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;margin-top:10px;font-weight:bold">② RHYTHM MUTATIONS</div>
+  <div class="patch"><div class="patch-from">Trig Delay CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Toolbox IN1</div></div>
+  <div class="patch"><div class="patch-from">Toolbox XOR OUT</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch CLK</div></div>
+  <div class="patch"><div class="patch-from">FHX-8GT GT1</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch IN1</div></div>
+  <div class="patch"><div class="patch-from">FHX-8GT GT2</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch IN2</div></div>
+  <div class="patch"><div class="patch-from">Griffins Claws 1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch CLK (alt)</div></div>
+  <div class="patch"><div class="patch-from">Seq Switch OUT</div><div class="patch-arrow">→</div><div class="patch-to">Triple Steeple CH1 Trig</div></div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;margin-top:10px;font-weight:bold">③ ENVELOPE LAYER</div>
+  <div class="patch"><div class="patch-from">FHX-8GT GT1 (kick)</div><div class="patch-arrow">→</div><div class="patch-to">Maths CH1 Trig</div></div>
+  <div class="patch"><div class="patch-from">Maths CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Quad VCA CH1 CV</div></div>
+  <div class="patch"><div class="patch-from">Triple Steeple CH3 OUT</div><div class="patch-arrow">→</div><div class="patch-to">MISO IN</div></div>
+  <div class="patch"><div class="patch-from">MISO OUT</div><div class="patch-arrow">→</div><div class="patch-to">QZVCO FM Index</div></div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;margin-top:10px;font-weight:bold">④ MACRO RESET</div>
+  <div class="patch"><div class="patch-from">Tetrapad OUT1 (LFO sq)</div><div class="patch-arrow">→</div><div class="patch-to">Tempi RST</div></div>
+  <div class="patch"><div class="patch-from">Tetrapad OUT1</div><div class="patch-arrow">→</div><div class="patch-to">Seq Switch RST</div></div>
+</div>
+
+<div class="card">
+  <div class="card-title" style="color:var(--accent);border-color:var(--accent)">PATCH B — MELODIC / HARMONIC SYSTEM</div>
+  <div style="font-size:10px;color:var(--dim);margin-bottom:10px">Focus on pitch, chords, and melodic variation. Less percussion, more harmony.</div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;font-weight:bold">① PITCH SOURCES</div>
+  <div class="patch"><div class="patch-from">SQ-1 CV A</div><div class="patch-arrow">→</div><div class="patch-to">Precision Adder IN A</div></div>
+  <div class="patch"><div class="patch-from">Dual S&H OUT1</div><div class="patch-arrow">→</div><div class="patch-to">Precision Adder IN B</div></div>
+  <div class="patch"><div class="patch-from">Griffins Claws (smooth)</div><div class="patch-arrow">→</div><div class="patch-to">Precision Adder IN C</div></div>
+  <div class="patch"><div class="patch-from">Precision Adder OUT</div><div class="patch-arrow">→</div><div class="patch-to">QZVCO V/oct</div></div>
+  <div class="patch"><div class="patch-from">Disting (quantizer) OUT</div><div class="patch-arrow">→</div><div class="patch-to">Ensemble Osc Root</div></div>
+  <div class="patch"><div class="patch-from">FH-2 OUT3</div><div class="patch-arrow">→</div><div class="patch-to">Ensemble Osc Root (MIDI)</div></div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;margin-top:10px;font-weight:bold">② HARMONIC MODULATION</div>
+  <div class="patch"><div class="patch-from">Maths CH1 ENV</div><div class="patch-arrow">→</div><div class="patch-to">Ensemble Osc Spread</div></div>
+  <div class="patch"><div class="patch-from">Griffins Claws 2</div><div class="patch-arrow">→</div><div class="patch-to">Ensemble Osc Detune</div></div>
+  <div class="patch"><div class="patch-from">Tempi OUT3</div><div class="patch-arrow">→</div><div class="patch-to">Maths CH2 Trig (LFO mode)</div></div>
+  <div class="patch"><div class="patch-from">Maths CH2 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Dual Filter Cutoff A</div></div>
+
+  <div style="font-size:10px;color:var(--accent3);margin-bottom:4px;margin-top:10px;font-weight:bold">③ VOICE ROUTING</div>
+  <div class="patch"><div class="patch-from">QZVCO OUT</div><div class="patch-arrow">→</div><div class="patch-to">Dual Filter CH1 IN (LP)</div></div>
+  <div class="patch"><div class="patch-from">Dual Filter CH1 OUT</div><div class="patch-arrow">→</div><div class="patch-to">Amps 1A IN</div></div>
+  <div class="patch"><div class="patch-from">FH-2 OUT2 (gate)</div><div class="patch-arrow">→</div><div class="patch-to">Amps 1A CV</div></div>
+  <div class="patch"><div class="patch-from">Amps 1A OUT</div><div class="patch-arrow">→</div><div class="patch-to">Magneto IN L</div></div>
+  <div class="patch"><div class="patch-from">Ensemble Osc OUT</div><div class="patch-arrow">→</div><div class="patch-to">Magneto IN R</div></div>
+  <div class="patch"><div class="patch-from">Magneto OUT L+R</div><div class="patch-arrow">→</div><div class="patch-to">Tascam CH1+2</div></div>
+</div>
+```
+
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="card-title" style="color:var(--accent);border-color:var(--accent)">PATCH TIPS — CABLE COLOR CODING SUGGESTION</div>
+    <div class="grid-4" style="margin-top:8px">
+      <div><span class="tag tag-clk">YELLOW</span><div style="font-size:10px;color:var(--dim);margin-top:4px">Clock / trigger signals. All Tempi outputs, Trig Delay, FHX-8GT gates.</div></div>
+      <div><span class="tag tag-cv">PURPLE</span><div style="font-size:10px;color:var(--dim);margin-top:4px">CV / modulation signals. Maths, Griffins Claws, Tetrapad, S&H outputs.</div></div>
+      <div><span class="tag tag-audio">RED</span><div style="font-size:10px;color:var(--dim);margin-top:4px">Audio signals. VCO → Filter → VCA → FX → output chain.</div></div>
+      <div><span class="tag tag-midi">WHITE</span><div style="font-size:10px;color:var(--dim);margin-top:4px">MIDI / V/oct. FH-2 outputs, SQ-1 CV, Precision Adder paths.</div></div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGRIPPA :: DIJKSTRA PATHFINDER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --g:   #00ff41;
+  --g2:  #00cc33;
+  --r:   #ff2244;
+  --amb: #ffb700;
+  --bg:  #000d02;
+  --fld: #010c02;
+}
+html, body {
+  background:var(--bg); color:var(--g);
+  font-family:'Share Tech Mono',monospace;
+  height:100vh; overflow:hidden;
+}
+/* CRT scanlines */
+body::before {
+  content:''; position:fixed; inset:0;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.16) 3px,rgba(0,0,0,0.16) 4px);
+  pointer-events:none; z-index:9000;
+}
+/* vignette */
+body::after {
+  content:''; position:fixed; inset:0;
+  background:radial-gradient(ellipse at 50% 48%,transparent 38%,rgba(0,0,0,0.6) 100%);
+  pointer-events:none; z-index:9001;
+}
+@keyframes grain {
+  0%,100%{background-position:0 0} 20%{background-position:-4% -8%}
+  40%{background-position:3% 5%} 60%{background-position:-6% 3%} 80%{background-position:4% -6%}
+}
+.grain {
+  position:fixed; inset:0; opacity:0.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px; animation:grain 0.35s steps(1) infinite;
+  pointer-events:none; z-index:8999;
+}
+
+/* PAGE */
+.page { display:flex; flex-direction:column; height:100vh; padding:8px 14px 5px; }
+
+/* HEADER */
+.hdr {
+display:flex; align-items:center; justify-content:space-between;
+flex-shrink:0; padding-bottom:5px;
+border-bottom:1px solid rgba(0,255,65,0.12); margin-bottom:6px;
+}
+@keyframes flicker { 0%,93%,96%,100%{opacity:1} 94%,95%{opacity:0.4} }
+.hdr-title {
+font-family:‘VT323’,monospace; font-size:1.55rem;
+letter-spacing:9px; text-shadow:0 0 10px var(–g),0 0 28px rgba(0,255,65,0.28);
+animation:flicker 11s infinite;
+}
+.hdr-title span { color:var(–r); text-shadow:0 0 10px var(–r); }
+.hdr-right { display:flex; align-items:center; gap:18px; font-size:0.5rem; letter-spacing:2px; color:rgba(0,255,65,0.32); }
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+.dot-blink { width:5px; height:5px; border-radius:50%; background:var(–g); box-shadow:0 0 6px var(–g); animation:blink 1.8s infinite; display:inline-block; margin-right:4px; }
+
+/* INPUT ROW */
+.input-row { display:flex; align-items:center; gap:12px; flex-shrink:0; margin-bottom:5px; flex-wrap:wrap; }
+.prompt { font-family:‘VT323’,monospace; font-size:1.85rem; color:var(–g2); text-shadow:0 0 8px var(–g); }
+#wordInput {
+background:transparent; border:none; border-bottom:2px solid rgba(0,255,65,0.7);
+color:var(–g); font-family:‘VT323’,monospace; font-size:2rem;
+letter-spacing:9px; padding:2px 10px; width:260px; outline:none;
+text-transform:uppercase; text-shadow:0 0 10px rgba(0,255,65,0.6);
+caret-color:var(–g); transition:border-color 0.18s,color 0.18s;
+}
+#wordInput::placeholder { color:rgba(0,255,65,0.16); font-size:1.3rem; }
+#wordInput:focus { border-bottom-color:var(–amb); color:var(–amb); text-shadow:0 0 10px rgba(255,183,0,0.65); }
+
+#info-panel {
+font-family:‘VT323’,monospace; font-size:1rem; letter-spacing:3px;
+color:rgba(0,255,65,0.45); display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+}
+.iv  { color:rgba(0,255,65,0.9); }
+.ir  { color:var(–r); }
+.ia  { color:var(–amb); }
+.ipath { color:rgba(0,255,65,0.55); font-size:0.78rem; letter-spacing:2px; max-width:480px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+
+/* FIELD */
+#field-wrap {
+position:relative; flex:1; min-height:0;
+border:1px solid rgba(0,255,65,0.15);
+background:var(–fld);
+background-image:radial-gradient(circle,rgba(0,255,65,0.038) 1px,transparent 1px);
+background-size:30px 30px;
+overflow:hidden; margin-bottom:5px;
+}
+#field-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5; }
+
+/* NODE */
+.node {
+position:absolute; transform:translate(-50%,-50%);
+cursor:crosshair; z-index:20;
+}
+.node-dot {
+border-radius:50%; display:flex; align-items:center; justify-content:center;
+transition:all 0.22s ease;
+}
+/* tier base styles */
+.nd-o { width:22px; height:22px; background:rgba(0,255,65,0.1);  border:1px solid rgba(0,255,65,0.3);  box-shadow:0 0 5px rgba(0,255,65,0.15); }
+.nd-t { width:23px; height:23px; background:rgba(255,183,0,0.08); border:1px solid rgba(255,183,0,0.22); box-shadow:0 0 5px rgba(255,183,0,0.1); }
+.nd-h { width:24px; height:24px; background:rgba(255,34,68,0.08);  border:1px solid rgba(255,34,68,0.18);  box-shadow:0 0 5px rgba(255,34,68,0.08); }
+/* active / highlighted */
+.nd-o.active { background:rgba(0,255,65,0.32)  !important; border-color:var(–g)  !important; box-shadow:0 0 14px var(–g),0 0 30px rgba(0,255,65,0.35) !important; width:26px !important; height:26px !important; }
+.nd-t.active { background:rgba(255,183,0,0.28) !important; border-color:var(–amb) !important; box-shadow:0 0 14px var(–amb),0 0 30px rgba(255,183,0,0.35) !important; width:28px !important; height:28px !important; }
+.nd-h.active { background:rgba(255,34,68,0.28) !important; border-color:var(–r)   !important; box-shadow:0 0 14px var(–r),0 0 30px rgba(255,34,68,0.35) !important; width:30px !important; height:30px !important; }
+/* path intermediate */
+.nd-o.onpath { background:rgba(0,255,65,0.16) !important; border-color:rgba(0,255,65,0.6) !important; }
+.nd-t.onpath { background:rgba(255,183,0,0.14) !important; border-color:rgba(255,183,0,0.5) !important; }
+.nd-h.onpath { background:rgba(255,34,68,0.14) !important; border-color:rgba(255,34,68,0.45) !important; }
+
+.node-letter {
+font-family:‘VT323’,monospace; font-size:1rem;
+pointer-events:none; transition:color 0.2s;
+}
+.nl-o { color:rgba(0,255,65,0.65); }
+.nl-t { color:rgba(255,183,0,0.6); }
+.nl-h { color:rgba(255,34,68,0.58); }
+.node-dot.active .node-letter { color:#fff !important; text-shadow:0 0 8px currentColor; }
+
+.node-val {
+position:absolute; bottom:-17px; left:50%; transform:translateX(-50%);
+font-family:‘VT323’,monospace; font-size:0.7rem; letter-spacing:0px;
+pointer-events:none; white-space:nowrap; transition:color 0.2s;
+}
+.nv-o { color:rgba(0,255,65,0.28); }
+.nv-t { color:rgba(255,183,0,0.28); }
+.nv-h { color:rgba(255,34,68,0.26); }
+.node-dot.active ~ .node-val { color:rgba(255,255,255,0.7) !important; }
+
+/* SCALE */
+.scale-wrap { flex-shrink:0; }
+.scale-label { font-size:0.44rem; letter-spacing:5px; color:rgba(0,255,65,0.22); margin-bottom:3px; display:flex; align-items:center; gap:8px; }
+.scale-label::after { content:’’; flex:1; height:1px; background:rgba(0,255,65,0.09); }
+.scale-grid { display:grid; grid-template-columns:repeat(26,1fr); gap:2px; }
+.sc { border:1px solid rgba(0,255,65,0.09); padding:4px 2px 3px; text-align:center; transition:all 0.2s; background:rgba(0,255,65,0.015); }
+.sc-l { font-family:‘VT323’,monospace; font-size:0.98rem; color:rgba(0,255,65,0.28); line-height:1; }
+.sc-v { font-size:0.4rem; color:rgba(0,255,65,0.16); margin-top:2px; }
+.sc.word-lit { border-color:rgba(0,255,65,0.7); background:rgba(0,255,65,0.1); box-shadow:0 0 6px rgba(0,255,65,0.15); }
+.sc.word-lit .sc-l { color:var(–g); text-shadow:0 0 7px var(–g); }
+.sc.word-lit .sc-v { color:rgba(0,255,65,0.7); }
+.sc.path-lit { border-color:rgba(0,255,65,0.38); background:rgba(0,255,65,0.045); }
+.sc.path-lit .sc-l { color:rgba(0,255,65,0.7); }
+.sc.path-lit .sc-v { color:rgba(0,255,65,0.4); }
+
+/* TOOLTIP */
+#tooltip {
+position:fixed; background:rgba(0,6,1,0.97); border:1px solid var(–g);
+padding:5px 14px; font-family:‘VT323’,monospace; font-size:1.1rem;
+letter-spacing:3px; color:var(–g); pointer-events:none; z-index:9999;
+display:none; white-space:nowrap; box-shadow:0 0 16px rgba(0,255,65,0.2);
+}
+#tooltip.ta { border-color:var(–amb); color:var(–amb); box-shadow:0 0 16px rgba(255,183,0,0.2); }
+#tooltip.tr { border-color:var(–r);   color:var(–r);   box-shadow:0 0 16px rgba(255,34,68,0.2); }
+
+/* path animation */
+@keyframes dash-march { to { stroke-dashoffset:-20; } }
+.path-line-march {
+stroke-dasharray:6 6;
+animation:dash-march 0.5s linear infinite;
+}
+@keyframes pulse-dot { 0%,100%{r:4} 50%{r:6} }
+</style>
+
+</head>
+<body>
+<div class="grain"></div>
+<div id="tooltip"></div>
+
+<div class="page">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-title">∴ AGRIPPA <span>::</span> DIJKSTRA PATHFINDER ∴</div>
+    <div class="hdr-right">
+      <span><span class="dot-blink"></span>ENGINE ACTIVE</span>
+      <span id="clock"></span>
+      <span id="node-ct"></span>
+    </div>
+  </div>
+
+  <!-- INPUT -->
+
+  <div class="input-row">
+    <span class="prompt">▶</span>
+    <input id="wordInput" type="text" placeholder="TYPE WORD..." autocomplete="off"
+           spellcheck="false" maxlength="14" value="AGRIPPA" autofocus />
+    <div id="info-panel"></div>
+  </div>
+
+  <!-- CONSTELLATION FIELD -->
+
+  <div id="field-wrap">
+    <svg id="field-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- SCALE STRIP -->
+
+  <div class="scale-wrap">
+    <div class="scale-label">// AGRIPPA SCALA — ONES · TENS · HUNDREDS — DIJKSTRA MINIMUM COST PATH</div>
+    <div class="scale-grid" id="scaleGrid"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   Agrippa gematria + Dijkstra pathfinder
+   Three concentric rings: Ones · Tens · Hundreds
+══════════════════════════════════════ */
+const G = {
+  A:1,  B:2,  C:3,  D:4,  E:5,  F:6,  G:7,  H:8,  I:9,
+  J:10, K:20, L:30, M:40, N:50, O:60, P:70, Q:80, R:90,
+  S:100,T:200,U:300,V:400,W:500,X:600,Y:700,Z:800
+};
+const LETTERS = Object.keys(G);
+
+/* ── Build complete weighted graph: edge weight = |G[a] - G[b]| ── */
+const GRAPH = {};
+LETTERS.forEach(a => {
+  GRAPH[a] = {};
+  LETTERS.forEach(b => { if (a !== b) GRAPH[a][b] = Math.abs(G[a] - G[b]); });
+});
+
+/* ── Dijkstra: returns {path, cost} from src to dst ── */
+function dijkstra(src, dst) {
+  const dist = {}, prev = {}, visited = new Set();
+  LETTERS.forEach(l => { dist[l] = Infinity; prev[l] = null; });
+  dist[src] = 0;
+  const pq = new Set(LETTERS);
+  while (pq.size) {
+    let u = null;
+    pq.forEach(l => { if (u === null || dist[l] < dist[u]) u = l; });
+    if (u === dst || dist[u] === Infinity) break;
+    pq.delete(u);
+    Object.entries(GRAPH[u]).forEach(([v, w]) => {
+      if (!pq.has(v)) return;
+      const alt = dist[u] + w;
+      if (alt < dist[v]) { dist[v] = alt; prev[v] = u; }
+    });
+  }
+  const path = []; let cur = dst;
+  while (cur) { path.unshift(cur); cur = prev[cur]; }
+  return { path, cost: dist[dst] };
+}
+
+/* ── Chain Dijkstra through unique letters of word (in appearance order) ── */
+function wordPath(word) {
+  const unique = [], seen = new Set();
+  for (const c of word) { if (!seen.has(c)) { unique.push(c); seen.add(c); } }
+  if (unique.length < 2) return { segments: [], fullPath: unique, totalCost: 0 };
+  const segments = [], fullPath = [unique[0]];
+  let totalCost = 0;
+  for (let i = 0; i < unique.length - 1; i++) {
+    const { path, cost } = dijkstra(unique[i], unique[i + 1]);
+    segments.push({ from: unique[i], to: unique[i + 1], path, cost });
+    fullPath.push(...path.slice(1));
+    totalCost += cost;
+  }
+  return { segments, fullPath, totalCost };
+}
+
+/* ── Node position state ── */
+const nodePos  = {};   // letter → {x, y}
+const nodeEls  = {};   // letter → .node div
+
+function getTier(l) {
+  const i = LETTERS.indexOf(l);
+  return i < 9 ? 'o' : i < 18 ? 't' : 'h';
+}
+
+/* ── Compute positions: 3 concentric rings ── */
+function computePositions() {
+  const field = document.getElementById('field-wrap');
+  const W = field.offsetWidth, H = field.offsetHeight;
+  const cx = W / 2, cy = H / 2;
+  const r  = Math.min(W, H) * 0.42;
+
+  // Ones A-I: inner ring
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2 - Math.PI / 2;
+    nodePos[LETTERS[i]] = { x: cx + r * 0.30 * Math.cos(a), y: cy + r * 0.30 * Math.sin(a) };
+  }
+  // Tens J-R: middle ring
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * Math.PI * 2 - Math.PI / 2;
+    nodePos[LETTERS[9 + i]] = { x: cx + r * 0.62 * Math.cos(a), y: cy + r * 0.62 * Math.sin(a) };
+  }
+  // Hundreds S-Z: outer ring
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+    nodePos[LETTERS[18 + i]] = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+  return { cx, cy, r };
+}
+
+/* ── Build/rebuild DOM nodes ── */
+function buildNodes() {
+  const field = document.getElementById('field-wrap');
+  field.querySelectorAll('.node').forEach(e => e.remove());
+  Object.keys(nodeEls).forEach(k => delete nodeEls[k]);
+
+  const { cx, cy, r } = computePositions();
+
+  LETTERS.forEach(l => {
+    const tier = getTier(l);
+    const { x, y } = nodePos[l];
+
+    const wrap = document.createElement('div');
+    wrap.className = 'node';
+    wrap.style.left = x + 'px';
+    wrap.style.top  = y + 'px';
+
+    const dot = document.createElement('div');
+    dot.className = `node-dot nd-${tier}`;
+    dot.dataset.letter = l;
+
+    const span = document.createElement('span');
+    span.className = `node-letter nl-${tier}`;
+    span.textContent = l;
+    dot.appendChild(span);
+
+    const val = document.createElement('div');
+    val.className = `node-val nv-${tier}`;
+    val.textContent = G[l];
+
+    wrap.appendChild(dot);
+    wrap.appendChild(val);
+
+    const tipCls = tier === 't' ? 'ta' : tier === 'h' ? 'tr' : '';
+    wrap.addEventListener('mouseenter', () =>
+      showTip(`${l} &nbsp;·&nbsp; ${G[l]} &nbsp;·&nbsp; ${tier==='o'?'ONES':tier==='t'?'TENS':'HUNDREDS'}`, tipCls)
+    );
+    wrap.addEventListener('mouseleave', hideTip);
+
+    field.appendChild(wrap);
+    nodeEls[l] = { wrap, dot, val };
+  });
+
+  /* Draw ring circles in SVG */
+  drawRings(cx, cy, r);
+}
+
+/* ── SVG ring circles ── */
+function drawRings(cx, cy, r) {
+  const svg = document.getElementById('field-svg');
+  [[0.30,'rgba(0,255,65,0.07)','ONES'],[0.62,'rgba(255,183,0,0.055)','TENS'],[1.0,'rgba(255,34,68,0.045)','HUNDREDS']]
+    .forEach(([rf, stroke, label]) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+      c.setAttribute('r', r * rf);
+      c.setAttribute('fill', 'none');
+      c.setAttribute('stroke', stroke);
+      c.setAttribute('stroke-width', '1');
+      c.setAttribute('stroke-dasharray', '2 6');
+      svg.appendChild(c);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', cx); t.setAttribute('y', cy - r * rf - 5);
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('fill', stroke);
+      t.setAttribute('font-family',"'Share Tech Mono',monospace");
+      t.setAttribute('font-size','9');
+      t.setAttribute('letter-spacing','4');
+      t.textContent = label;
+      svg.appendChild(t);
+    });
+}
+
+/* ── Draw SVG connections ── */
+function drawConnections(wordLettersSet, fullPath, pathLettersSet) {
+  const svg = document.getElementById('field-svg');
+  /* keep ring circles — remove only lines & animated paths */
+  svg.querySelectorAll('.conn-line,.path-seg,.path-march,.path-dot').forEach(e => e.remove());
+
+  function mkLine(x1,y1,x2,y2,stroke,sw,dash,cls) {
+    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
+    ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+    ln.setAttribute('stroke',stroke); ln.setAttribute('stroke-width',sw);
+    if (dash) ln.setAttribute('stroke-dasharray',dash);
+    if (cls)  ln.setAttribute('class',cls);
+    return ln;
+  }
+
+  /* Background web: connect same-tier letters with faint lines */
+  const groups = [LETTERS.slice(0,9), LETTERS.slice(9,18), LETTERS.slice(18)];
+  const tierColors = ['rgba(0,255,65,0.06)','rgba(255,183,0,0.05)','rgba(255,34,68,0.04)'];
+  groups.forEach((grp, gi) => {
+    for (let a = 0; a < grp.length; a++) {
+      for (let b = a+1; b < grp.length; b++) {
+        const pa = nodePos[grp[a]], pb = nodePos[grp[b]];
+        svg.appendChild(mkLine(pa.x,pa.y,pb.x,pb.y,tierColors[gi],'1','3 8','conn-line'));
+      }
+    }
+  });
+
+  /* Path segments */
+  if (fullPath.length > 1) {
+    for (let i = 0; i < fullPath.length - 1; i++) {
+      const a = fullPath[i], b = fullPath[i+1];
+      const pa = nodePos[a], pb = nodePos[b];
+      const aIsWord = wordLettersSet.has(a);
+      const bIsWord = wordLettersSet.has(b);
+      const isKey   = aIsWord && bIsWord;
+
+      /* base glow line */
+      if (isKey) {
+        const glow = mkLine(pa.x,pa.y,pb.x,pb.y,'rgba(0,255,65,0.15)','5',null,'path-seg');
+        svg.appendChild(glow);
+      }
+      const col = isKey ? 'rgba(0,255,65,0.85)' : 'rgba(0,255,65,0.28)';
+      const sw  = isKey ? '1.5' : '1';
+      const ln  = mkLine(pa.x,pa.y,pb.x,pb.y,col,sw,null,'path-seg');
+      svg.appendChild(ln);
+
+      /* marching ants on key edges */
+      if (isKey) {
+        const march = mkLine(pa.x,pa.y,pb.x,pb.y,'rgba(0,255,65,0.55)','1',null,'path-march path-line-march');
+        svg.appendChild(march);
+      }
+    }
+
+    /* Dots on path nodes */
+    fullPath.forEach(l => {
+      const p = nodePos[l];
+      const isWord = wordLettersSet.has(l);
+      if (isWord) return; // node handles its own highlight
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
+      dot.setAttribute('r','3');
+      dot.setAttribute('fill','rgba(0,255,65,0.4)');
+      dot.setAttribute('class','path-dot');
+      svg.appendChild(dot);
+    });
+  }
+}
+
+/* ── Highlight node elements ── */
+function highlightNodes(wordLettersSet, pathLettersSet) {
+  LETTERS.forEach(l => {
+    const { dot } = nodeEls[l] || {};
+    if (!dot) return;
+    const tier = getTier(l);
+    dot.classList.remove('active','onpath');
+    if (wordLettersSet.has(l))      dot.classList.add('active');
+    else if (pathLettersSet.has(l)) dot.classList.add('onpath');
+  });
+}
+
+/* ── Scale strip ── */
+function buildScale(wordSet, pathSet) {
+  const grid = document.getElementById('scaleGrid');
+  grid.innerHTML = '';
+  for (const [l, v] of Object.entries(G)) {
+    const d = document.createElement('div');
+    const isWord = wordSet && wordSet.has(l);
+    const isPath = pathSet && pathSet.has(l) && !isWord;
+    d.className = 'sc' + (isWord ? ' word-lit' : isPath ? ' path-lit' : '');
+    d.innerHTML = `<div class="sc-l">${l}</div><div class="sc-v">${v}</div>`;
+    grid.appendChild(d);
+  }
+}
+
+/* ── Tooltip ── */
+const tip = document.getElementById('tooltip');
+document.addEventListener('mousemove', e => {
+  tip.style.left = (e.clientX + 18) + 'px';
+  tip.style.top  = (e.clientY - 14) + 'px';
+});
+const showTip = (html, cls) => { tip.className = cls||''; tip.innerHTML = html; tip.style.display = 'block'; };
+const hideTip = () => { tip.style.display = 'none'; };
+
+/* ── Clock ── */
+(function tick(){
+  document.getElementById('clock').textContent = new Date().toTimeString().slice(0,8);
+  setTimeout(tick, 1000);
+})();
+
+/* ══ MAIN COMPUTE ══ */
+let debounce = null;
+let currentWord = null;
+
+function compute() {
+  const raw = document.getElementById('wordInput').value.toUpperCase().replace(/[^A-Z]/g,'');
+  const info = document.getElementById('info-panel');
+  const nc   = document.getElementById('node-ct');
+
+  if (!raw) {
+    info.innerHTML = '';
+    nc.textContent = '';
+    buildScale(null, null);
+    LETTERS.forEach(l => { const {dot}=nodeEls[l]||{}; if(dot){dot.classList.remove('active','onpath');} });
+    drawConnections(new Set(), [], new Set());
+    return;
+  }
+
+  currentWord = raw;
+  const letters = raw.split('');
+  const vals    = letters.map(l => G[l] || 0);
+  const total   = vals.reduce((a,b) => a+b, 0);
+  const wordSet = new Set(letters);
+
+  const { segments, fullPath, totalCost } = wordPath(raw);
+  const pathSet = new Set(fullPath);
+
+  /* Info panel */
+  const pathStr = fullPath.length > 1
+    ? fullPath.join('<span style="color:rgba(0,255,65,0.3)">→</span>')
+    : raw;
+  info.innerHTML = `
+    <span class="ia">${raw}</span>
+    &nbsp;·&nbsp; Σ=<span class="iv">${total}</span>
+    &nbsp;·&nbsp; COST=<span class="ir">${totalCost}</span>
+    &nbsp;·&nbsp; <span class="ipath">${pathStr}</span>
+  `;
+  nc.textContent = `${fullPath.length} PATH NODES`;
+
+  highlightNodes(wordSet, pathSet);
+  drawConnections(wordSet, fullPath, pathSet);
+  buildScale(wordSet, pathSet);
+}
+
+document.getElementById('wordInput').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(compute, 60);
+});
+document.getElementById('wordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { clearTimeout(debounce); compute(); }
+});
+
+/* ── Init & resize ── */
+function init() {
+  buildNodes();
+  buildScale(null, null);
+  compute();
+}
+
+let rsz = null;
+window.addEventListener('resize', () => {
+  clearTimeout(rsz);
+  rsz = setTimeout(() => { buildNodes(); compute(); }, 120);
+});
+
+init();
+</script>
+
+</body>
+</html>

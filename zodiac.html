@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speculum Coeli · Timișoara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Noto+Sans+Symbols&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#231c12; --ink-soft:rgba(35,28,18,.55); --paper:#ffffff;
+    --fell:'IM Fell English',Georgia,'Times New Roman',serif;
+    --fellsc:'IM Fell English SC','IM Fell English',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;}
+  body{color:var(--ink);font-family:var(--fell);font-size:17px;background:#fff;}
+  main{max-width:860px;margin:0 auto;padding:18px 14px 30px;}
+  .ornament{display:block;width:100%;max-width:820px;height:auto;margin:0 auto;}
+  .ornament.flip{transform:scaleY(-1);margin-top:14px;}
+  h1{font-family:var(--fellsc);font-weight:normal;font-size:40px;letter-spacing:.14em;text-align:center;margin:10px 0 0;}
+  .sub{text-align:center;font-style:italic;font-size:16px;margin:2px 0 0;}
+  .sub2{text-align:center;font-style:italic;font-size:14.5px;color:var(--ink-soft);margin:2px 0 0;}
+  .plate{position:relative;width:100%;max-width:820px;margin:6px auto 0;touch-action:manipulation;}
+  .plate svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;}
+  .controls{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 16px;margin:16px auto 6px;
+            border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:10px 8px;max-width:640px;
+            box-shadow:0 3px 0 -2px var(--ink),0 -3px 0 -2px var(--ink);}
+  .controls label{font-family:var(--fellsc);font-size:18px;letter-spacing:.06em;display:flex;align-items:center;gap:10px;}
+  input[type=datetime-local]{font-family:var(--fell);font-size:17px;color:var(--ink);background:#fff;
+      border:1px solid var(--ink);border-radius:0;padding:4px 8px;}
+  button{font-family:var(--fellsc);font-size:17px;letter-spacing:.05em;color:var(--paper);background:var(--ink);border:1px solid var(--ink);
+         border-radius:0;padding:5px 14px;cursor:pointer;}
+  button:hover{background:#3d3121}
+  #status{font-style:italic;font-size:15px;color:var(--ink-soft);}
+  .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 18px;font-size:14.5px;margin:4px auto 0;max-width:680px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend svg{width:30px;height:12px;}
+  .ordo{max-width:640px;margin:22px auto 0;}
+  .ordo h2{font-family:var(--fellsc);font-weight:normal;font-size:26px;letter-spacing:.12em;text-align:center;margin:0;}
+  .ordo table{width:100%;border-collapse:collapse;margin-top:10px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);font-size:16px;}
+  .ordo th{font-family:var(--fellsc);font-weight:normal;text-align:left;padding:6px 8px;border-bottom:1px solid var(--ink);}
+  .ordo td{padding:4px 8px;border-bottom:1px solid rgba(35,28,18,.18);}
+  .ordo td.n,.ordo th:first-child{text-align:right;width:3em;color:var(--ink-soft);}
+  .ordo td.g{width:2em;text-align:center;font-size:19px;}
+  .ordo td.num,.ordo th:nth-child(n+4){white-space:nowrap;}
+  .ordo tbody tr{cursor:pointer;}
+  .ordo tbody tr:hover{background:#f3f0ea;}
+  .ordo tbody tr.sel{background:var(--ink);color:#fff;}
+  .ordo tbody tr.sel td.n{color:#fff;}
+  .ordo tbody tr.angle td:nth-child(3){font-family:var(--fellsc);letter-spacing:.04em;}
+  footer{text-align:center;font-size:14.5px;font-style:italic;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
+
+  .sigil{cursor:pointer;outline:none;}
+  .sigil .hit{fill:rgba(0,0,0,0);stroke:none;shape-rendering:crispEdges;}
+  .sigil text{pointer-events:none;fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:2.2px;stroke-linejoin:miter;}
+  .sigil:hover .hit,.sigil:focus-visible .hit,.sigil.active .hit{fill:#fff;stroke:var(--ink);stroke-width:1;}
+  .sigil.linked .hit{fill:#fff;stroke:var(--ink);stroke-width:1.4;}
+  .sigil.selected .hit{fill:var(--ink);stroke:var(--ink);stroke-width:1;}
+  .sigil.selected text{fill:var(--paper);stroke:var(--ink);}
+  .glyph{font-family:'Noto Sans Symbols','Noto Sans Symbols 2','Segoe UI Symbol','Apple Symbols','DejaVu Sans',sans-serif;}
+  .lbl{font-family:var(--fellsc);}
+
+  .tip{position:absolute;z-index:5;pointer-events:none;background:#fff;color:var(--ink);font-family:var(--fell);
+       border:1px solid var(--ink);outline:1px solid var(--ink);outline-offset:2px;border-radius:0;
+       padding:6px 11px;font-size:15px;line-height:1.35;white-space:nowrap;opacity:0;transition:opacity .1s;
+       box-shadow:3px 4px 0 rgba(35,28,18,.18);}
+  .tip.show{opacity:1;}
+  .tip b{display:block;font-family:var(--fellsc);font-weight:normal;font-size:17px;letter-spacing:.04em;border-bottom:1px solid var(--ink-soft);margin-bottom:2px;}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img class="ornament" src="ornament.png" alt="">
+    <h1>Speculum Coeli</h1>
+    <p class="sub">supra Timisoaram · 45°45′ N · 21°13′ E</p>
+    <p class="sub2">The heavens over Timișoara, as they stand this minute. Click a sigil to see its aspects.</p>
+  </header>
+
+  <div class="plate" id="wrap">
+    <svg id="wheel" viewBox="0 0 680 680" role="img" aria-label="Zodiac wheel for Timișoara"></svg>
+    <div class="tip" id="tip" role="tooltip"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <form class="controls" id="ctl" autocomplete="off">
+    <label>Tempus <input type="datetime-local" id="dt" step="60" aria-label="Date and time in Timișoara"></label>
+    <button type="button" id="now">Now</button>
+    <span id="status"></span>
+  </form>
+  <footer id="meta"></footer>
+  <section class="ordo">
+    <h2>Ordo Planetarum</h2>
+    <p class="sub2">Every point in zodiac order, going round from the Ascendant. Click a row to show its aspects on the wheel.</p>
+    <table>
+      <thead><tr><th>No.</th><th></th><th>Point</th><th>Position</th><th>House</th><th>From AC</th></tr></thead>
+      <tbody id="ordo"></tbody>
+    </table>
+  </section>
+  <img class="ornament flip" src="ornament.png" alt="">
+</main>
+
+<script>
+/* ===== ASTRO CALC (begin) ===== */
+const D2R=Math.PI/180,R2D=180/Math.PI;
+const sind=x=>Math.sin(x*D2R),cosd=x=>Math.cos(x*D2R),tand=x=>Math.tan(x*D2R);
+const asind=x=>Math.asin(x)*R2D,atan2d=(y,x)=>Math.atan2(y,x)*R2D;
+const norm=x=>((x%360)+360)%360;
+
+function kepler(M,e){let E=M+e*R2D*sind(M)*(1+e*cosd(M));for(let k=0;k<12;k++)E-=(E-e*R2D*sind(E)-M)/(1-e*cosd(E));return E;}
+function orbit(el){
+  const M=norm(el.M),E=kepler(M,el.e);
+  const xv=el.a*(cosd(E)-el.e),yv=el.a*Math.sqrt(1-el.e*el.e)*sind(E);
+  const v=atan2d(yv,xv),r=Math.hypot(xv,yv),u=v+el.w;
+  const xh=r*(cosd(el.N)*cosd(u)-sind(el.N)*sind(u)*cosd(el.i));
+  const yh=r*(sind(el.N)*cosd(u)+cosd(el.N)*sind(u)*cosd(el.i));
+  const zh=r*sind(u)*sind(el.i);
+  return {lon:norm(atan2d(yh,xh)),lat:atan2d(zh,Math.hypot(xh,yh)),r,M};
+}
+function elements(d){
+  return {
+    sun:{N:0,i:0,w:282.9404+4.70935e-5*d,a:1,e:0.016709-1.151e-9*d,M:356.0470+0.9856002585*d},
+    moon:{N:125.1228-0.0529538083*d,i:5.1454,w:318.0634+0.1643573223*d,a:60.2666,e:0.0549,M:115.3654+13.0649929509*d},
+    mercury:{N:48.3313+3.24587e-5*d,i:7.0047+5e-8*d,w:29.1241+1.01444e-5*d,a:0.387098,e:0.205635+5.59e-10*d,M:168.6562+4.0923344368*d},
+    venus:{N:76.6799+2.4659e-5*d,i:3.3946+2.75e-8*d,w:54.8910+1.38374e-5*d,a:0.72333,e:0.006773-1.302e-9*d,M:48.0052+1.6021302244*d},
+    mars:{N:49.5574+2.11081e-5*d,i:1.8497-1.78e-8*d,w:286.5016+2.92961e-5*d,a:1.523688,e:0.093405+2.516e-9*d,M:18.6021+0.5240207766*d},
+    jupiter:{N:100.4542+2.76854e-5*d,i:1.3030-1.557e-7*d,w:273.8777+1.64505e-5*d,a:5.20256,e:0.048498+4.469e-9*d,M:19.8950+0.0830853001*d},
+    saturn:{N:113.6634+2.3898e-5*d,i:2.4886-1.081e-7*d,w:339.3939+2.97661e-5*d,a:9.55475,e:0.055546-9.499e-9*d,M:316.9670+0.0334442282*d},
+    uranus:{N:74.0005+1.3978e-5*d,i:0.7733+1.9e-8*d,w:96.6612+3.0565e-5*d,a:19.18171-1.55e-8*d,e:0.047318+7.45e-9*d,M:142.5905+0.011725806*d},
+    neptune:{N:131.7806+3.0173e-5*d,i:1.7700-2.55e-7*d,w:272.8461-6.027e-6*d,a:30.05826+3.313e-8*d,e:0.008606+2.15e-9*d,M:260.2471+0.005995147*d}
+  };
+}
+function geoLongitudes(jd){
+  const d=jd-2451543.5,T=(jd-2451545)/36525,el=elements(d);
+  const sun=orbit(el.sun),xs=sun.r*cosd(sun.lon),ys=sun.r*sind(sun.lon);
+  const out={sun:sun.lon};
+  // Moon (geocentric) with main perturbations
+  const mo=orbit(el.moon),Ms=norm(el.sun.M),Mm=norm(el.moon.M);
+  const Ls=norm(el.sun.w+Ms),Lm=norm(el.moon.N+el.moon.w+Mm),D=Lm-Ls,F=Lm-el.moon.N;
+  out.moon=norm(mo.lon-1.274*sind(Mm-2*D)+0.658*sind(2*D)-0.186*sind(Ms)-0.059*sind(2*Mm-2*D)-0.057*sind(Mm-2*D+Ms)
+    +0.053*sind(Mm+2*D)+0.046*sind(2*D-Ms)+0.041*sind(Mm-Ms)-0.035*sind(D)-0.031*sind(Mm+Ms)-0.015*sind(2*F-2*D)+0.011*sind(Mm-4*D));
+  const Mj=norm(el.jupiter.M),Mss=norm(el.saturn.M),Mu=norm(el.uranus.M);
+  const pert={
+    jupiter:-0.332*sind(2*Mj-5*Mss-67.6)-0.056*sind(2*Mj-2*Mss+21)+0.042*sind(3*Mj-5*Mss+21)-0.036*sind(Mj-2*Mss)
+      +0.022*cosd(Mj-Mss)+0.023*sind(2*Mj-3*Mss+52)-0.016*sind(Mj-5*Mss-69),
+    saturn:0.812*sind(2*Mj-5*Mss-67.6)-0.229*cosd(2*Mj-4*Mss-2)+0.119*sind(Mj-2*Mss-3)+0.046*sind(2*Mj-6*Mss-69)+0.014*sind(Mj-3*Mss+32),
+    uranus:0.040*sind(Mss-2*Mu+6)+0.035*sind(Mss-3*Mu+33)-0.015*sind(Mj-Mu+20)
+  };
+  const toGeo=(lon,lat,r)=>{const xh=r*cosd(lat)*cosd(lon),yh=r*cosd(lat)*sind(lon);return norm(atan2d(yh+ys,xh+xs));};
+  for(const p of ['mercury','venus','mars','jupiter','saturn','uranus','neptune']){
+    const h=orbit(el[p]);out[p]=toGeo(h.lon+(pert[p]||0),h.lat,h.r);
+  }
+  // Pluto (heliocentric series, J2000 → equinox of date)
+  const S=50.03+0.033459652*d,P=238.95+0.003968789*d;
+  const pl=238.9508+0.00400703*d-19.799*sind(P)+19.848*cosd(P)+0.897*sind(2*P)-4.956*cosd(2*P)+0.610*sind(3*P)+1.211*cosd(3*P)
+    -0.341*sind(4*P)-0.190*cosd(4*P)+0.128*sind(5*P)-0.034*cosd(5*P)-0.038*sind(6*P)+0.031*cosd(6*P)+0.020*sind(S-P)-0.010*cosd(S-P);
+  const pb=-3.9082-5.453*sind(P)-14.975*cosd(P)+3.527*sind(2*P)+1.673*cosd(2*P)-1.051*sind(3*P)+0.328*cosd(3*P)+0.179*sind(4*P)
+    -0.292*cosd(4*P)+0.019*sind(5*P)+0.100*cosd(5*P)-0.031*sind(6*P)-0.026*cosd(6*P)+0.011*cosd(S-P);
+  const pr=40.72+6.68*sind(P)+6.90*cosd(P)-1.18*sind(2*P)-0.03*cosd(2*P)+0.15*sind(3*P)-0.14*cosd(3*P);
+  out.pluto=toGeo(pl+1.3969713*T,pb,pr);
+  // True lunar node and mean Lilith (Meeus)
+  const Dm=297.8501921+445267.1114034*T,Mn=357.5291092+35999.0502909*T,Mp=134.9633964+477198.8675055*T,Fm=93.2720950+483202.0175233*T;
+  const mean=125.0445479-1934.1362891*T+0.0020754*T*T;
+  out.node=norm(mean-1.4979*sind(2*(Dm-Fm))-0.1500*sind(Mn)-0.1226*sind(2*Dm)+0.1176*sind(2*Fm)-0.0801*sind(2*(Fm-Mp)));
+  out.lilith=norm(83.3532465+4069.0137287*T-0.01032*T*T);
+  return out;
+}
+function placidus(ramc,eps,phi){
+  const mc=norm(atan2d(sind(ramc),cosd(ramc)*cosd(eps)));
+  let asc=norm(atan2d(cosd(ramc),-(sind(ramc)*cosd(eps)+tand(phi)*sind(eps))));
+  if(norm(asc-mc)>180)asc=norm(asc+180);
+  const raToLon=ra=>norm(atan2d(sind(ra),cosd(ra)*cosd(eps)));
+  const cusp=(f,above,guess)=>{
+    let lam=guess;
+    for(let k=0;k<30;k++){
+      const dec=asind(sind(eps)*sind(lam)),x=tand(phi)*tand(dec);
+      if(Math.abs(x)>=1)return NaN;
+      const ad=asind(x);
+      const ra=above?ramc+f*(90+ad):ramc+180-f*(90-ad);
+      lam=raToLon(ra);
+    }
+    return lam;
+  };
+  const c11=cusp(1/3,true,norm(mc+30)),c12=cusp(2/3,true,norm(mc+60));
+  const c2=cusp(2/3,false,norm(asc+30)),c3=cusp(1/3,false,norm(asc+60));
+  let c=[null,asc,c2,c3,norm(mc+180),norm(c11+180),norm(c12+180),norm(asc+180),norm(c2+180),norm(c3+180),mc,c11,c12];
+  if([c11,c12,c2,c3].some(Number.isNaN)){ // Porphyry fallback
+    const q1=norm(asc-mc)/3,q2=norm(mc+180-asc)/3;
+    c=[null,asc,norm(asc+q2),norm(asc+2*q2),norm(mc+180),norm(mc+180+q1),norm(mc+180+2*q1),norm(asc+180),norm(asc+180+q2),norm(asc+180+2*q2),mc,norm(mc+q1),norm(mc+2*q1)];
+  }
+  return {asc,mc,cusps:c};
+}
+function houseOf(lon,cusps){
+  for(let h=1;h<=12;h++){const a=cusps[h],b=cusps[h%12+1];if(norm(lon-a)<norm(b-a))return h;}
+  return 1;
+}
+function computeChart(date,lat,lonE){
+  const jd=date.getTime()/86400000+2440587.5,T=(jd-2451545)/36525,d=jd-2451543.5;
+  const eps=23.4393-3.563e-7*d;
+  const gmst=norm(280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T);
+  const ramc=norm(gmst+lonE);
+  const H=placidus(ramc,eps,lat);
+  const L=geoLongitudes(jd),Lb=geoLongitudes(jd-0.25),La=geoLongitudes(jd+0.25);
+  const retro={};for(const k in L)retro[k]=((norm(La[k]-Lb[k]+180)-180)<0);
+  const sunHouse=houseOf(L.sun,H.cusps),day=sunHouse>=7;
+  L.fortune=norm(day?H.asc+L.moon-L.sun:H.asc+L.sun-L.moon);
+  return {jd,asc:H.asc,mc:H.mc,cusps:H.cusps,lon:L,retro};
+}
+/* ===== ASTRO CALC (end) ===== */
+
+const TZ='Europe/Bucharest', LAT=45.7489, LON=21.2087;
+const SIGNS=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGN_GLYPH=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'].map(g=>g+'︎');
+const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+const BODIES=[
+  ['sun','Sun','☉'],['moon','Moon','☽'],['mercury','Mercury','☿'],['venus','Venus','♀'],['mars','Mars','♂'],
+  ['jupiter','Jupiter','♃'],['saturn','Saturn','♄'],['uranus','Uranus','♅'],['neptune','Neptune','♆'],['pluto','Pluto','♇'],
+  ['node','North Node','☊'],['lilith','Lilith','⚸'],['fortune','Part of Fortune','⊗']
+];
+const GLYPH_FONT="'Noto Sans Symbols','Noto Sans Symbols 2','Segoe UI Symbol','Apple Symbols','DejaVu Sans',sans-serif";
+const LABEL_FONT="'IM Fell English SC','IM Fell English',Georgia,serif";
+
+function fmtPos(lon){
+  const s=Math.floor(lon/30)%12,x=lon-30*Math.floor(lon/30);
+  const dg=Math.floor(x),mn=Math.floor((x-dg)*60+1e-9);
+  return `${dg}°${String(mn).padStart(2,'0')}′ ${SIGNS[s]}`;
+}
+function fmtArc(a){
+  let dg=Math.floor(a),mn=Math.round((a-dg)*60);if(mn===60){dg++;mn=0;}
+  return mn===0?`${dg}°`:`${dg}°${String(mn).padStart(2,'0')}′`;
+}
+const sep=(a,b)=>{const x=norm(a-b);return x>180?360-x:x;};
+
+/* ===== Time in Timișoara ===== */
+const fmtParts=new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+function zoneParts(date){const o={};for(const p of fmtParts.formatToParts(date))o[p.type]=p.value;return o;}
+function zoneOffset(date){const p=zoneParts(date);return Date.UTC(+p.year,+p.month-1,+p.day,+p.hour%24,+p.minute,+p.second)-Math.floor(date.getTime()/1000)*1000;}
+function inputToDate(v){
+  const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(v);if(!m)return null;
+  const guess=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
+  let t=guess-zoneOffset(new Date(guess));const off2=zoneOffset(new Date(t));t=guess-off2;
+  return new Date(t);
+}
+function dateToInput(d){const p=zoneParts(d);return `${p.year}-${p.month}-${p.day}T${String(+p.hour%24).padStart(2,'0')}:${p.minute}`;}
+
+/* ===== Glyph fitting: size each glyph's ink to fill its square hitbox ===== */
+const ctx=document.createElement('canvas').getContext('2d');
+const inkCache=new Map();
+function ink(str,family){
+  const key=family+'|'+str;if(inkCache.has(key))return inkCache.get(key);
+  ctx.font=`100px ${family}`;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  const m=ctx.measureText(str);
+  let r={L:m.actualBoundingBoxLeft||0,R:m.actualBoundingBoxRight||m.width,A:m.actualBoundingBoxAscent||70,D:m.actualBoundingBoxDescent||0};
+  if(r.L+r.R<=0||r.A+r.D<=0)r={L:0,R:60,A:70,D:0};
+  inkCache.set(key,r);return r;
+}
+
+/* ===== Rendering ===== */
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('wheel'),tip=document.getElementById('tip'),wrap=document.getElementById('wrap');
+const CX=340,CY=340,R0=282,R1=242,R2=160,RI=136;
+function mk(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let ASC=0;
+const ang=lon=>(180+lon-ASC)*D2R;
+const pt=(r,lon)=>[CX+r*Math.cos(ang(lon)),CY-r*Math.sin(ang(lon))];
+const INK='#231c12',PAPER='#ffffff';
+let selectedId=null,tipFor=null,tipId=null,currentChart=null,aspG=null;
+
+/* ===== Aspects (interconnections) ===== */
+const ASPECTS=[[0,'\u260C',8,'solid'],[60,'\u26B9',5,'4 3'],[90,'\u25A1',7,'solid'],[120,'\u25B3',7,'4 3'],[150,'\u26BB',3,'1 2.5'],[180,'\u260D',8,'solid']];
+const ORBF={sun:1.25,moon:1.25,node:.6,lilith:.5,fortune:.5,asc:.75,mc:.75,dsc:.75,ic:.75};
+const MIRROR={asc:'dsc',dsc:'asc',mc:'ic',ic:'mc'};
+function pointLons(c){const o={...c.lon,asc:c.asc,mc:c.mc,dsc:norm(c.asc+180),ic:norm(c.mc+180)};return o;}
+function aspectBetween(a,b,la,lb){
+  const d=sep(la,lb),f=((ORBF[a]||1)+(ORBF[b]||1))/2;
+  for(const [angle,glyph,orb,dash] of ASPECTS){if(Math.abs(d-angle)<=orb*f)return {angle,glyph,dash,exact:Math.abs(d-angle)};}
+  return null;
+}
+function drawAspects(){
+  if(!aspG||!currentChart)return;
+  aspG.textContent='';
+  svg.querySelectorAll('.sigil.linked').forEach(e=>e.classList.remove('linked'));
+  const L=pointLons(currentChart),ids=Object.keys(L);
+  const line=(a,b,asp,strong)=>{
+    if(asp.angle===0)return;
+    const [x1,y1]=pt(RI,L[a]),[x2,y2]=pt(RI,L[b]);
+    mk('line',{x1,y1,x2,y2,stroke:INK,'stroke-width':strong?(asp.dash==='solid'?1.5:1.2):.55,'stroke-dasharray':asp.dash==='solid'?'':asp.dash,opacity:strong?1:.4},aspG);
+  };
+  const sel=selectedId;
+  if(sel&&L[sel]!==undefined){
+    const marks=[];
+    for(const o of ids){
+      if(o===sel||MIRROR[sel]===o)continue;
+      const asp=aspectBetween(sel,o,L[sel],L[o]);if(!asp)continue;
+      line(sel,o,asp,true);
+      const g=svg.querySelector(`.sigil[data-id="${o}"]`);if(g)g.classList.add('linked');
+      if(asp.angle!==0){const [x1,y1]=pt(RI,L[sel]),[x2,y2]=pt(RI,L[o]);
+        let pos=null;for(const f of [.5,.38,.62,.28,.72,.2,.8]){const x=x1+(x2-x1)*f,y=y1+(y2-y1)*f;if(marks.every(m=>Math.hypot(m[0]-x,m[1]-y)>16)){pos=[x,y];break;}}
+        if(pos)marks.push([pos[0],pos[1],asp.glyph]);}
+    }
+    for(const [x,y,gl] of marks){
+      mk('rect',{x:x-7,y:y-7,width:14,height:14,fill:PAPER,stroke:INK,'stroke-width':.7},aspG);
+      const m=ink(gl,GLYPH_FONT),k=11/Math.max(m.L+m.R,m.A+m.D);
+      const t=mk('text',{x:x-k*(m.R-m.L)/2,y:y+k*(m.A-m.D)/2,'font-size':(100*k).toFixed(2),fill:INK,style:`font-family:${GLYPH_FONT}`},aspG);t.textContent=gl+'\uFE0E';
+    }
+    const [sx,sy]=pt(RI,L[sel]);mk('circle',{cx:sx,cy:sy,r:3,fill:INK},aspG);
+  }else if(sel&&sel.startsWith('sign-')){
+    const s=+sel.slice(5);
+    for(const o of ids){if(Math.floor(L[o]/30)===s){const g=svg.querySelector(`.sigil[data-id="${o}"]`);if(g)g.classList.add('linked');}}
+  }else{
+    const base=ids.filter(i=>i!=='dsc'&&i!=='ic');
+    for(let i=0;i<base.length;i++)for(let j=i+1;j<base.length;j++){
+      const a=base[i],b=base[j],asp=aspectBetween(a,b,L[a],L[b]);if(asp)line(a,b,asp,false);
+    }
+  }
+}
+
+function makeSigil(parent,id,cx,cy,S,label,family,info){
+  const g=mk('g',{class:'sigil','data-id':id,tabindex:'0',role:'button','aria-label':`${info.name}, ${info.pos}`},parent);
+  mk('rect',{class:'hit',x:cx-S/2,y:cy-S/2,width:S,height:S,rx:0,ry:0},g);
+  const m=ink(label,family),fill=0.86,k=(S*fill)/Math.max(m.L+m.R,m.A+m.D);
+  const t=mk('text',{x:cx-k*(m.R-m.L)/2,y:cy+k*(m.A-m.D)/2,'font-size':(100*k).toFixed(2),'text-anchor':'start',
+    style:`font-family:${family}`},g);
+  t.textContent=label;
+  g._info=info;
+  if(id===selectedId)g.classList.add('selected');
+  return g;
+}
+
+function defs(){
+  const d=mk('defs',{},svg);
+  const hatch=(id,angle,gap,w,op)=>{const p=mk('pattern',{id,patternUnits:'userSpaceOnUse',width:gap,height:gap,patternTransform:`rotate(${angle})`},d);
+    mk('line',{x1:0,y1:0,x2:0,y2:gap,stroke:INK,'stroke-width':w,opacity:op},p);};
+  hatch('h45',45,3.2,.55,.75);hatch('h135',-45,3.2,.55,.75);hatch('h0',0,3,.5,.7);hatch('h90',90,3.4,.5,.6);
+  hatch('hfine',30,2.4,.45,.8);hatch('hdense',60,2,.6,.9);
+  const cross=mk('pattern',{id:'hx',patternUnits:'userSpaceOnUse',width:3.4,height:3.4,patternTransform:'rotate(45)'},d);
+  mk('line',{x1:0,y1:0,x2:0,y2:3.4,stroke:INK,'stroke-width':.5,opacity:.75},cross);
+  mk('line',{x1:0,y1:0,x2:3.4,y2:0,stroke:INK,'stroke-width':.5,opacity:.75},cross);
+  const dots=mk('pattern',{id:'hdot',patternUnits:'userSpaceOnUse',width:4,height:4},d);
+  mk('circle',{cx:1,cy:1,r:.45,fill:INK,opacity:.7},dots);mk('circle',{cx:3,cy:3,r:.45,fill:INK,opacity:.7},dots);
+  // circle paths for lettering
+  for(const r of [])mk('path',{id:'arc'+r,d:`M${CX-r},${CY} A${r},${r} 0 1 1 ${CX+r},${CY} A${r},${r} 0 1 1 ${CX-r},${CY}`},d);
+}
+function ring(r1,r2,fill,parent){mk('path',{d:`M${CX-r2},${CY}a${r2},${r2} 0 1,0 ${2*r2},0a${r2},${r2} 0 1,0 ${-2*r2},0Z M${CX-r1},${CY}a${r1},${r1} 0 1,1 ${2*r1},0a${r1},${r1} 0 1,1 ${-2*r1},0Z`,fill,'fill-rule':'evenodd'},parent);}
+function circ(r,w,parent,extra){return mk('circle',Object.assign({cx:CX,cy:CY,r,fill:'none',stroke:INK,'stroke-width':w},extra||{}),parent);}
+
+function render(chart){
+  svg.textContent='';tipFor=null;tip.classList.remove('show');
+  ASC=chart.asc;
+  const {cusps,mc}=chart;
+  const infoFor=(name,lon,house)=>({name,pos:fmtPos(lon),house:house??houseOf(lon,cusps),dist:sep(lon,mc)});
+  defs();
+  mk('rect',{x:0,y:0,width:680,height:680,fill:PAPER},svg);
+
+  // Zodiac band, hatched by element
+  const ELEMFILL=['url(#h45)','url(#h0)','url(#hdot)','url(#h135)'];
+  const zg=mk('g',{},svg);
+  for(let s=0;s<12;s++){
+    const a=s*30,b=a+30,[x1,y1]=pt(R0,a),[x2,y2]=pt(R0,b),[x3,y3]=pt(R1,b),[x4,y4]=pt(R1,a);
+    const d=`M${x1},${y1} A${R0},${R0} 0 0 0 ${x2},${y2} L${x3},${y3} A${R1},${R1} 0 0 1 ${x4},${y4}Z`;
+    mk('path',{d,fill:PAPER,stroke:'none'},zg);
+    mk('path',{d,fill:ELEMFILL[s%4],opacity:.42,stroke:INK,'stroke-width':1},zg);
+  }
+  circ(R0,1.6,svg);circ(R1,1.3,svg);
+  // planet field and degree ticks
+  ring(R2,R1,PAPER,svg);
+  for(let dg=0;dg<360;dg++){
+    const len=dg%10===0?9:dg%5===0?6:3,[x1,y1]=pt(R1,dg),[x2,y2]=pt(R1-len,dg);
+    mk('line',{x1,y1,x2,y2,stroke:INK,'stroke-width':dg%5===0?.9:.5},svg);
+  }
+  circ(R1-10,.5,svg);
+  // house band
+  ring(RI,R2,PAPER,svg);circ(R2,1.3,svg);circ(RI,1.1,svg);
+  aspG=mk('g',{},svg);
+
+  // House cusps
+  for(let h=1;h<=12;h++){
+    const isAngle=h%3===1,[x1,y1]=pt(RI,cusps[h]),[x2,y2]=pt(isAngle?R0+6:R1,cusps[h]);
+    mk('line',{x1,y1,x2,y2,stroke:INK,'stroke-width':isAngle?1.8:.8,'stroke-dasharray':isAngle?'':'1 0'},svg);
+    const mid=norm(cusps[h]+norm(cusps[h%12+1]-cusps[h])/2),[tx,ty]=pt((RI+R2)/2,mid);
+    const t=mk('text',{x:tx,y:ty,'font-size':12,fill:INK,'text-anchor':'middle','dominant-baseline':'central',style:`font-family:${LABEL_FONT}`},svg);t.textContent=ROMAN[h];
+  }
+
+  const sg=mk('g',{},svg);
+  for(let s=0;s<12;s++){
+    const [x,y]=pt((R0+R1)/2,s*30+15),start=s*30;
+    makeSigil(sg,'sign-'+s,x,y,30,SIGN_GLYPH[s],GLYPH_FONT,{...infoFor(SIGNS[s],start),pos:fmtPos(start)+' (sign start)'});
+  }
+  const angles=[['asc','Ascendant','AC',chart.asc,1],['mc','Midheaven','MC',mc,10],['dsc','Descendant','DC',norm(chart.asc+180),7],['ic','Imum Coeli','IC',norm(mc+180),4]];
+  for(const [id,name,lbl,lon,h] of angles){
+    const [x,y]=pt(R0+20,lon);
+    makeSigil(sg,id,x,y,24,lbl,LABEL_FONT,infoFor(name,lon,h));
+  }
+  const items=BODIES.map(([id,name,g])=>({id,name,g,lon:chart.lon[id],disp:chart.lon[id]})).sort((a,b)=>a.lon-b.lon);
+  const MIN=8.6;
+  for(let it=0;it<300;it++){
+    let moved=false;
+    for(let i=0;i<items.length;i++){
+      const A=items[i],B=items[(i+1)%items.length],gap=norm(B.disp-A.disp);
+      if(gap<MIN){const p=(MIN-gap)/2+0.01;A.disp=norm(A.disp-p);B.disp=norm(B.disp+p);moved=true;}
+    }
+    if(!moved)break;
+  }
+  const RG=208,S=26;
+  for(const b of items){
+    const [x1,y1]=pt(R1,b.lon),[x2,y2]=pt(R1-12,b.lon),[x3,y3]=pt(RG+S/2+2,b.disp);
+    mk('line',{x1,y1,x2,y2,stroke:INK,'stroke-width':2},svg);
+    mk('line',{x1:x2,y1:y2,x2:x3,y2:y3,stroke:INK,'stroke-width':.6,'stroke-dasharray':'2 1.5'},svg);
+    const [x,y]=pt(RG,b.disp);
+    makeSigil(sg,b.id,x,y,S,b.g+'︎',GLYPH_FONT,infoFor(b.name,b.lon));
+    if(chart.retro[b.id]&&!['node','lilith','fortune'].includes(b.id)){
+      const [rx,ry]=pt(RG-S/2-7,b.disp);
+      const t=mk('text',{x:rx,y:ry,'font-size':10,'font-style':'italic',fill:INK,'text-anchor':'middle','dominant-baseline':'central','pointer-events':'none',style:"font-family:'IM Fell English',Georgia,serif"},svg);t.textContent='R';
+    }
+  }
+  currentChart=chart;bindSigils();drawAspects();renderOrdo(chart);
+  if(tipId){const g=svg.querySelector(`.sigil[data-id="${tipId}"]`);if(g)showTip(g);else tipId=null;}
+}
+
+/* ===== Tooltip & interaction ===== */
+function showTip(g){
+  const i=g._info;tip.innerHTML='';
+  const nm=document.createElement('b');nm.textContent=i.name;tip.appendChild(nm);
+  for(const line of [i.pos,`House ${i.house}`,`${fmtArc(i.dist)} from MC`]){const dv=document.createElement('div');dv.textContent=line;tip.appendChild(dv);}
+  tip.style.left='0px';tip.style.top='0px';tip.classList.add('show');
+  const wr=wrap.getBoundingClientRect(),gr=g.querySelector('.hit').getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  let left=gr.left-wr.left+gr.width/2-tw/2,top=gr.top-wr.top-th-8;
+  if(top<0)top=gr.bottom-wr.top+8;
+  left=Math.max(2,Math.min(left,wr.width-tw-2));
+  tip.style.left=left+'px';tip.style.top=top+'px';
+  svg.querySelectorAll('.sigil.active').forEach(e=>e.classList.remove('active'));
+  g.classList.add('active');tipFor=g;tipId=g.dataset.id;
+}
+function hideTip(){tip.classList.remove('show');if(tipFor)tipFor.classList.remove('active');tipFor=null;tipId=null;}
+function toggleSelect(g){
+  const id=g.dataset.id;
+  svg.querySelectorAll('.sigil.selected').forEach(e=>e.classList.remove('selected'));
+  if(selectedId===id)selectedId=null;else{selectedId=id;g.classList.add('selected');}
+  drawAspects();markOrdo();
+}
+function renderOrdo(c){
+  const L=pointLons(c),names={asc:'Ascendant',mc:'Midheaven',dsc:'Descendant',ic:'Imum Coeli'},labels={asc:'AC',mc:'MC',dsc:'DC',ic:'IC'};
+  const house={asc:1,mc:10,dsc:7,ic:4};
+  for(const [id,name,g] of BODIES){names[id]=name;labels[id]=g+'\uFE0E';}
+  const ids=Object.keys(L).sort((a,b)=>{const da=norm(L[a]-c.asc),db=norm(L[b]-c.asc);return da-db||(a==='asc'?-1:b==='asc'?1:0);});
+  const tb=document.getElementById('ordo');tb.textContent='';
+  ids.forEach((id,i)=>{
+    const tr=document.createElement('tr');tr.dataset.id=id;if(house[id])tr.className='angle';
+    const arc=norm(L[id]-c.asc);
+    const cells=[i+1,labels[id],names[id],fmtPos(L[id]),'House '+(house[id]||houseOf(L[id],c.cusps)),fmtArc(arc)];
+    const cls=['n',house[id]?'':'g glyph','','num','num','num'];
+    cells.forEach((v,j)=>{const td=document.createElement('td');td.textContent=v;if(cls[j])td.className=cls[j];tr.appendChild(td);});
+    tr.addEventListener('click',()=>{const g=svg.querySelector(`.sigil[data-id="${id}"]`);if(g)toggleSelect(g);});
+    tb.appendChild(tr);
+  });
+  markOrdo();
+}
+function markOrdo(){document.querySelectorAll('#ordo tr').forEach(tr=>tr.classList.toggle('sel',tr.dataset.id===selectedId));}
+let lastPointer='mouse';
+function bindSigils(){
+  svg.querySelectorAll('.sigil').forEach(g=>{
+    g.addEventListener('pointerdown',e=>{lastPointer=e.pointerType;});
+    g.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')showTip(g);});
+    g.addEventListener('pointerleave',e=>{if(e.pointerType!=='touch'&&tipFor===g)hideTip();});
+    g.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      if(lastPointer==='touch'){if(tipFor===g)hideTip();else showTip(g);}
+      toggleSelect(g);
+    });
+    g.addEventListener('focus',()=>showTip(g));
+    g.addEventListener('blur',()=>{if(tipFor===g)hideTip();});
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleSelect(g);}if(e.key==='Escape')hideTip();});
+  });
+}
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.sigil'))hideTip();});
+window.addEventListener('resize',()=>{if(tipFor)showTip(tipFor);});
+
+(function(){
+  const names={0:'Conjunction',60:'Sextile',90:'Square',120:'Trine',150:'Quincunx',180:'Opposition'};
+  const lg=document.getElementById('legend');
+  for(const [a,g,,dash] of ASPECTS){
+    const sp=document.createElement('span');
+    const gl=document.createElement('span');gl.className='glyph';gl.textContent=g+'\uFE0E';
+    sp.appendChild(gl);
+    if(a!==0)sp.insertAdjacentHTML('beforeend',`<svg viewBox="0 0 30 12"><line x1="1" y1="6" x2="29" y2="6" stroke="#231c12" stroke-width="1.4" ${dash==='solid'?'':`stroke-dasharray="${dash}"`}/></svg>`);
+    sp.appendChild(document.createTextNode(names[a]));lg.appendChild(sp);
+  }
+})();
+
+/* ===== Time control & minute updates ===== */
+const $=id=>document.getElementById(id);
+let live=true;
+function update(){
+  const date=live?new Date():inputToDate($('dt').value);
+  if(!date||isNaN(date.getTime()))return;
+  if(live)$('dt').value=dateToInput(date);
+  render(computeChart(date,LAT,LON));
+  const p=zoneParts(date);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  $('status').textContent=live?'Live — redrawn every minute':'Fixed time — press Now to follow the sky again';
+  $('meta').textContent=`${+p.day} ${months[+p.month-1]} ${p.year}, ${String(+p.hour%24).padStart(2,'0')}:${p.minute} Timișoara (${date.toISOString().slice(11,16)} UT) · Tropical zodiac · Placidus houses`;
+}
+$('dt').addEventListener('input',()=>{live=false;update();});
+$('now').addEventListener('click',()=>{live=true;update();});
+$('ctl').addEventListener('submit',e=>e.preventDefault());
+function scheduleTick(){
+  const ms=60000-(Date.now()%60000)+50;
+  setTimeout(()=>{if(live)update();scheduleTick();},ms);
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&live)update();});
+update();scheduleTick();
+if(document.fonts){
+  Promise.all(['Noto Sans Symbols','Noto Sans Symbols 2','IM Fell English SC','IM Fell English'].map(f=>document.fonts.load(`20px "${f}"`,'☉♈⚸AC'))).catch(()=>{})
+    .finally(()=>document.fonts.ready.then(()=>{inkCache.clear();update();}));
+}
+</script>
+</body>
+</html>
